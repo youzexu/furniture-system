@@ -207,8 +207,6 @@ const testimonials = [
 .hero-stat span { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 2px; }
 
 /* Reveal */
-.reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s ease; }
-.reveal.revealed { opacity: 1; transform: translateY(0); }
 
 .text-center { text-align: center; }
 
