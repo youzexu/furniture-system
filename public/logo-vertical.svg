@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c9a84c"/>
+      <stop offset="30%" stop-color="#8b6914"/>
+      <stop offset="50%" stop-color="#d4b86a"/>
+      <stop offset="70%" stop-color="#8b6914"/>
+      <stop offset="100%" stop-color="#6b4f10"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2a2a"/>
+      <stop offset="40%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#0d0d0d"/>
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+
+  <rect width="400" height="250" fill="#fafaf8" rx="12"/>
+
+  <g transform="translate(105, 68)" filter="url(#softShadow)">
+    <polygon points="70,0 145,55 70,115 0,55"
+             fill="#fafaf8" stroke="url(#wood)" stroke-width="2.8"
+             stroke-linejoin="round"/>
+    <polygon points="70,8 137,55 70,107 3,55"
+             fill="none" stroke="#1a1a1a" stroke-width="0.5"
+             stroke-linejoin="round" opacity="0.25"/>
+    <path d="M70,24 Q100,55 70,91"
+          fill="none" stroke="url(#gold)" stroke-width="2"
+          stroke-linecap="round"/>
+    <path d="M70,36 Q88,55 70,77"
+          fill="none" stroke="url(#gold)" stroke-width="1.4"
+          stroke-linecap="round"/>
+    <circle cx="70" cy="55" r="4.5" fill="url(#gold)"/>
+    <circle cx="70" cy="55" r="7" fill="none" stroke="url(#gold)" stroke-width="0.6" opacity="0.5"/>
+    <line x1="70" y1="3" x2="70" y2="14" stroke="url(#gold)" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="64" y1="8" x2="76" y2="8" stroke="url(#gold)" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="70" y1="105" x2="70" y2="112" stroke="url(#gold)" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/>
+  </g>
+
+  <text x="200" y="162" text-anchor="middle"
+        font-family="'Noto Serif SC', 'STSong', 'SimSun', 'Songti SC', serif"
+        font-size="38" font-weight="600" letter-spacing="10"
+        fill="#1a1a1a">尚品工坊</text>
+
+  <text x="200" y="192" text-anchor="middle"
+        font-family="'Helvetica Neue', 'Arial', sans-serif"
+        font-size="10.5" font-weight="300" letter-spacing="9"
+        fill="#999">源头工厂 · 高端定制</text>
+
+  <line x1="125" y1="210" x2="275" y2="210" stroke="url(#gold)" stroke-width="1" stroke-linecap="round"/>
+  <polygon points="200,207 203,210 200,213 197,210" fill="url(#gold)" opacity="0.8"/>
+</svg>

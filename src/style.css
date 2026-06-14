@@ -1,0 +1,187 @@
+/* ===== 尚品工坊 - 全局样式 ===== */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap');
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --gold: #8b6914;
+  --gold-light: #c9a84c;
+  --dark: #1a1a1a;
+  --text: #333;
+  --text-light: #666;
+  --text-muted: #999;
+  --border: #e5e5e5;
+  --bg-warm: #fafaf8;
+  --white: #fff;
+  --radius: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Noto Serif SC', 'STSong', 'PingFang SC', 'Microsoft YaHei', serif;
+  color: var(--text);
+  background: var(--white);
+  line-height: 1.7;
+}
+
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+button, input, select, textarea {
+  font-family: inherit;
+  border-radius: 0;
+}
+
+/* 页面过渡 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 全局按钮 */
+.btn-primary {
+  display: inline-block;
+  padding: 14px 40px;
+  background: var(--gold);
+  color: #fff;
+  letter-spacing: 3px;
+  font-size: 14px;
+  border: none;
+  transition: background 0.3s;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: #7a5c12;
+}
+
+.btn-outline {
+  display: inline-block;
+  padding: 14px 40px;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  letter-spacing: 3px;
+  font-size: 14px;
+  background: transparent;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.btn-outline:hover {
+  background: var(--gold);
+  color: #fff;
+}
+
+/* 通用容器 */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* 通用区块 */
+.section {
+  padding: 100px 0;
+}
+
+.section-label {
+  font-size: 12px;
+  letter-spacing: 5px;
+  color: var(--gold);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-size: 36px;
+  font-weight: 300;
+  letter-spacing: 6px;
+  color: var(--dark);
+  margin-bottom: 16px;
+  font-family: 'Noto Serif SC', 'STSong', serif;
+}
+
+.section-subtitle {
+  font-size: 15px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  margin-bottom: 60px;
+}
+
+/* 分隔线 */
+.divider {
+  width: 40px;
+  height: 2px;
+  background: var(--gold);
+  margin: 0 auto 40px;
+}
+
+/* 页面 Banner */
+.page-banner {
+  height: 380px;
+  background: var(--dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  margin-top: 72px;
+}
+.page-banner .banner-label {
+  font-size: 12px;
+  letter-spacing: 6px;
+  color: var(--gold-light);
+  margin-bottom: 12px;
+}
+.page-banner h1 {
+  font-size: 44px;
+  font-weight: 300;
+  letter-spacing: 8px;
+  font-family: 'Noto Serif SC', 'STSong', serif;
+  margin-bottom: 12px;
+}
+.page-banner .banner-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 2px;
+}
+
+/* 淡入 */
+.page-fade {
+  opacity: 0;
+  transition: opacity 0.8s;
+}
+.page-fade.show {
+  opacity: 1;
+}
+
+/* 下滑渐现动画 */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s ease;
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f5f0e8; }
+::-webkit-scrollbar-thumb { background: var(--gold-light); border-radius: 0; }
+::selection { background: var(--gold); color: #fff; }

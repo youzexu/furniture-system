@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#c9a84c"/><stop offset="100%" stop-color="#8b6914"/></linearGradient></defs>
+  <rect width="120" height="120" fill="#fafaf8" rx="4"/>
+  <!-- Office desk -->
+  <g transform="translate(60,50)" stroke="url(#g)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-45" y="-8" width="90" height="8" rx="1"/>
+    <rect x="-38" y="0" width="8" height="25" rx="1"/><rect x="30" y="0" width="8" height="25" rx="1"/>
+    <rect x="-42" y="24" width="84" height="2" rx="1"/>
+    <rect x="-5" y="-22" width="18" height="14" rx="1"/><line x1="4" y1="-8" x2="4" y2="-3"/>
+  </g>
+  <text x="60" y="95" text-anchor="middle" font-family="'Noto Serif SC',serif" font-size="12" fill="#1a1a1a" letter-spacing="2">办公</text>
+</svg>

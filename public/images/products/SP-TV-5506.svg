@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c9a84c"/><stop offset="50%" stop-color="#d4b86a"/><stop offset="100%" stop-color="#8b6914"/>
+    </linearGradient>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="0.5" fill="#8b6914" opacity="0.06"/></pattern>
+  </defs>
+  <rect width="800" height="600" fill="#fafaf8"/>
+  <rect width="800" height="600" fill="url(#dots)"/>
+
+  <!-- TV cabinet abstract -->
+  <g transform="translate(400,230)" stroke="url(#gold)" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
+    <rect x="-160" y="-40" width="320" height="80" rx="2"/>
+    <line x1="-120" y1="-40" x2="-120" y2="40"/>
+    <line x1="120" y1="-40" x2="120" y2="40"/>
+    <line x1="-160" y1="0" x2="160" y2="0"/>
+    <circle cx="40" cy="20" r="2"/>
+    <circle cx="80" cy="20" r="2"/>
+    <!-- Legs -->
+    <line x1="-140" y1="40" x2="-140" y2="80"/><line x1="-100" y1="40" x2="-100" y2="80"/>
+    <line x1="100" y1="40" x2="100" y2="80"/><line x1="140" y1="40" x2="140" y2="80"/>
+    <rect x="-150" y="78" width="300" height="3" rx="1"/>
+  </g>
+
+  <text x="400" y="380" text-anchor="middle" font-family="'Noto Serif SC','STSong','SimSun',serif" font-size="32" font-weight="500" letter-spacing="6" fill="#1a1a1a">新中式胡桃木电视柜</text>
+  <text x="400" y="415" text-anchor="middle" font-family="'Helvetica Neue',Arial,sans-serif" font-size="13" letter-spacing="5" fill="#999">SP-TV-5506</text>
+  <line x1="340" y1="435" x2="460" y2="435" stroke="url(#gold)" stroke-width="1" stroke-linecap="round"/>
+</svg>

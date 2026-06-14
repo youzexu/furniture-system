@@ -1,0 +1,9 @@
+@echo off
+echo Starting Django API...
+start "Django-Server" cmd /c "cd /d D:\reasonix.all\reasonnix-demo-one\home\user\projects\image-editor && D:\python\python.exe manage.py runserver 0.0.0.0:8000"
+timeout /t 3 /nobreak >nul
+echo Starting Vite Frontend...
+start "Vite-Server" cmd /c "cd /d D:\reasonix.all\reasonnix-demo-one\home\user\projects\furniture-factory && npx vite --port 5175"
+echo Both servers started. Opening browser...
+timeout /t 5 /nobreak >nul
+start http://localhost:5175
