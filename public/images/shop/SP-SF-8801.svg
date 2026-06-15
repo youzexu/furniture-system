@@ -1,20 +1,2 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
-  <defs>
-    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#c9a84c"/><stop offset="50%" stop-color="#d4b86a"/><stop offset="100%" stop-color="#8b6914"/></linearGradient>
-    <pattern id="dots" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="0.4" fill="#8b6914" opacity="0.05"/></pattern>
-  </defs>
-  <rect width="600" height="600" fill="#fafaf8"/>
-  <rect width="600" height="600" fill="url(#dots)"/>
-  <!-- Sofa abstract - centered and larger for square -->
-  <g transform="translate(300,250)" stroke="url(#gold)" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.3">
-    <path d="M-130,40 Q-155,40 -155,20 L-155,-35 Q-155,-65 -115,-65 L115,-65 Q155,-65 155,-35 L155,20 Q155,40 130,40"/>
-    <path d="M-130,40 L-130,80 Q-130,100 -100,100 L100,100 Q130,100 130,80 L130,40"/>
-    <line x1="-110" y1="100" x2="-110" y2="120"/><line x1="110" y1="100" x2="110" y2="120"/>
-    <path d="M-90,-65 L-90,25"/><path d="M90,-65 L90,25"/>
-    <path d="M-155,20 Q-180,20 -180,45 L-180,80 Q-180,100 -155,100"/>
-    <path d="M155,20 Q180,20 180,45 L180,80 Q180,100 155,100"/>
-  </g>
-  <text x="300" y="400" text-anchor="middle" font-family="'Noto Serif SC','STSong',serif" font-size="28" font-weight="500" letter-spacing="6" fill="#1a1a1a">意式极简真皮沙发</text>
-  <text x="300" y="435" text-anchor="middle" font-family="'Helvetica Neue',Arial,sans-serif" font-size="13" letter-spacing="5" fill="#999">SP-SF-8801</text>
-  <line x1="240" y1="455" x2="360" y2="455" stroke="url(#gold)" stroke-width="1.2" stroke-linecap="round"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fafaf7"/><stop offset="100%" stop-color="#f5f0e8"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#c9a84c"/><stop offset="100%" stop-color="#8b6914"/></linearGradient><filter id="shadow" x="-5%" y="-5%" width="115%" height="115%"><feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#2C1810" flood-opacity="0.08"/></filter><pattern id="texture" width="60" height="60" patternUnits="userSpaceOnUse"><circle cx="30" cy="30" r="0.3" fill="#8b6914" opacity="0.03"/></pattern></defs><rect width="600" height="600" fill="url(#bg)"/><rect width="600" height="600" fill="url(#texture)"/>
+<g transform="translate(300,260)" filter="url(#shadow)"><path d="M-170,55 Q-190,55 -190,35 L-190,-30 Q-190,-80 -145,-80 L145,-80 Q190,-80 190,-30 L190,35 Q190,55 170,55 Z" fill="#2C1810" fill-opacity="0.04" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/><path d="M-170,55 L-170,90 Q-170,115 -140,115 L140,115 Q170,115 170,90 L170,55" fill="#2C1810" fill-opacity="0.06" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/><line x1="-145" y1="115" x2="-145" y2="145" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/><line x1="145" y1="115" x2="145" y2="145" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/><path d="M-190,35 Q-225,35 -225,58 L-225,90 Q-225,115 -190,115" fill="#2C1810" fill-opacity="0.03" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/><path d="M190,35 Q225,35 225,58 L225,90 Q225,115 190,115" fill="#2C1810" fill-opacity="0.03" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/><path d="M-135,-20 Q-65,-50 0,-25 Q65,-50 135,-20" fill="none" stroke="#8b6914" stroke-width="1.2" opacity="0.4"/></g><rect x="220" y="430" width="160" height="1.5" fill="url(#gold)" rx="0.5"/><text x="300" y="465" text-anchor="middle" font-family="'Noto Serif SC','STSong',serif" font-size="26" font-weight="500" letter-spacing="7" fill="#1a1a1a">意式极简真皮沙发</text><text x="300" y="492" text-anchor="middle" font-family="'Helvetica Neue',Arial,sans-serif" font-size="11" letter-spacing="5" fill="#999">SP-SF-8801</text></svg>

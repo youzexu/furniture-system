@@ -2,7 +2,30 @@
 import { onMounted, ref, onUnmounted } from 'vue'
 
 const visible = ref(false)
-onMounted(() => { setTimeout(() => visible.value = true, 100) })
+const stats = ref<string[]>(['0', '0', '0', '0'])
+onMounted(() => {
+  setTimeout(() => visible.value = true, 100)
+  setTimeout(() => {
+    const targets = [23, 30000, 200, 50]
+    const suffixes = ['+', '', '+', '+']
+    const duration = 2000
+    const start = Date.now()
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - start
+      const progress = Math.min(elapsed / duration, 1)
+      targets.forEach((t, i) => {
+        stats.value[i] = Math.floor(t * progress).toLocaleString() + suffixes[i]
+      })
+      if (progress >= 1) clearInterval(interval)
+    }, 40)
+  }, 500)
+  fetch(`${API_BASE}/api/partners/`).then(r => r.json()).then(d => { if (d.success) partners.value = d.data }).catch(() => {})
+  fetch(`${API_BASE}/api/testimonials/`).then(r => r.json()).then(d => { if (d.success) testimonials.value = d.data }).catch(() => {})
+})
+
+function scrollTo(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+}
 
 // Scroll-triggered reveal
 const reveals = ref<HTMLElement[]>([])
@@ -22,21 +45,17 @@ onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
 const advantages = [
-  { icon: '🌳', title: '原木直采', desc: '与全球优质林场建立长期合作，从源头把控木材品质，FSC 认证保障可持续性，精选北美白橡、欧洲榉木、东南亚柚木等优质原材。' },
-  { icon: '🔧', title: '精工制造', desc: '引进德国豪迈生产线，CNC 精密加工中心 12 台，每件产品经过 37 道品控节点，公差严格控制在 ±0.2mm 以内。' },
-  { icon: '🎨', title: '原创设计', desc: '中意设计团队 15 人联合研发，每年推出 200+ 新款，紧跟米兰国际家具展潮流，将前沿设计融入东方生活美学。' },
-  { icon: '📦', title: '全球物流', desc: '自建海外仓储体系覆盖北美、欧洲、中东、东南亚，支持 FOB / CIF / DDP 多种贸易条款，确保准时安全交付。' },
-  { icon: '🏅', title: '品质认证', desc: '通过 ISO 9001、ISO 14001、FSC、SGS 等国际权威认证，产品符合欧盟 E1 级环保标准及美国 CARB 认证。' },
-  { icon: '🤝', title: '无忧售后', desc: '3 年质保期内免费维修，终身维护服务，专属客服 7×24 小时响应，让您购物无忧、售后不愁。' },
+  { icon: '', title: '原木直采', desc: '与全球优质林场建立长期合作，从源头把控木材品质，FSC 认证保障可持续性，精选北美白橡、欧洲榉木、东南亚柚木等优质原材。' },
+  { icon: '', title: '精工制造', desc: '引进德国豪迈生产线，CNC 精密加工中心 12 台，每件产品经过 37 道品控节点，公差严格控制在 ±0.2mm 以内。' },
+  { icon: '', title: '原创设计', desc: '中意设计团队 15 人联合研发，每年推出 200+ 新款，紧跟米兰国际家具展潮流，将前沿设计融入东方生活美学。' },
+  { icon: '', title: '全球物流', desc: '自建海外仓储体系覆盖北美、欧洲、中东、东南亚，支持 FOB / CIF / DDP 多种贸易条款，确保准时安全交付。' },
+  { icon: '', title: '品质认证', desc: '通过 ISO 9001、ISO 14001、FSC、SGS 等国际权威认证，产品符合欧盟 E1 级环保标准及美国 CARB 认证。' },
+  { icon: '', title: '无忧售后', desc: '3 年质保期内免费维修，终身维护服务，专属客服 7×24 小时响应，让您购物无忧、售后不愁。' },
 ]
 
-const partners = ['万科地产', '保利发展', '绿城中国', '华润置地', '华侨城', '万达酒店', '希尔顿', '万豪国际', '洲际酒店']
-
-const testimonials = [
-  { name: '王总', role: '深圳某地产精装项目负责人', text: '与尚品工坊合作已有 5 年，累计交付超过 3000 套精装房家具。品质稳定、交期准时，是我们最信赖的供应商之一。' },
-  { name: '李女士', role: '杭州私宅业主', text: '全屋定制了客厅和主卧的家具，从设计到安装只用了 45 天。设计师非常专业，最终效果超过预期，朋友们都夸有品位。' },
-  { name: '陈先生', role: '广州酒店集团采购总监', text: '为旗下 3 家酒店定制了公区及客房家具，工厂的规模化生产能力令人印象深刻，售后响应也非常及时。' },
-]
+const partners = ref<string[]>([])
+const testimonials = ref<{name:string;role:string;text:string}[]>([])
+import { API_BASE } from '../api'
 </script>
 
 <template>
@@ -50,15 +69,15 @@ const testimonials = [
         <h1 class="hero-title">以工艺之名<br>定义家居美学</h1>
         <p class="hero-sub">二十三年专注高端家具制造<br>从原木到成品，每一件都是对品质的承诺</p>
         <div class="hero-actions">
-          <router-link to="/products" class="btn-primary">浏览产品</router-link>
+          <a href="#" class="btn-primary" @click.prevent="scrollTo('categories')">浏览产品</a>
           <router-link to="/contact" class="btn-outline">联系我们</router-link>
         </div>
       </div>
       <div class="hero-stats">
-        <div class="hero-stat"><b>23+</b><span>年行业深耕</span></div>
-        <div class="hero-stat"><b>30,000</b><span>㎡ 智造基地</span></div>
-        <div class="hero-stat"><b>200+</b><span>资深匠人</span></div>
-        <div class="hero-stat"><b>50+</b><span>出口国家</span></div>
+        <div class="hero-stat"><b>{{ stats[0] }}</b><span>年行业深耕</span></div>
+        <div class="hero-stat"><b>{{ stats[1] }}</b><span>㎡ 智造基地</span></div>
+        <div class="hero-stat"><b>{{ stats[2] }}</b><span>资深匠人</span></div>
+        <div class="hero-stat"><b>{{ stats[3] }}</b><span>出口国家</span></div>
       </div>
     </section>
 
@@ -67,7 +86,7 @@ const testimonials = [
       <div class="container">
         <div :ref="addReveal" class="intro-grid reveal">
           <div class="intro-image">
-            <img src="/images/brand-story.svg" alt="尚品工坊总部展厅" class="intro-img" />
+            <img src="/images/brand-story.svg" alt="尚品工坊总部展厅" class="intro-img" loading="lazy" />
           </div>
           <div class="intro-text">
             <p class="section-label">BRAND STORY</p>
@@ -82,7 +101,7 @@ const testimonials = [
     </section>
 
     <!-- ===== 产品系列 ===== -->
-    <section class="section" style="background:#fafaf8">
+    <section id="categories" class="section" style="background:#fafaf8">
       <div class="container">
         <div :ref="addReveal" class="text-center reveal">
           <p class="section-label">COLLECTION</p>

@@ -8,7 +8,7 @@ const visible = ref(false)
 const submitted = ref(false)
 const submitting = ref(false)
 const errorMsg = ref('')
-const API_BASE = 'http://127.0.0.1:8000'
+import { API_BASE } from '../api'
 const auth = useAuthStore()
 const showLoginPrompt = ref(false)
 
@@ -65,7 +65,7 @@ async function handleSubmit() {
   errorMsg.value = ''
 
   try {
-    const res = await fetch(`${API_BASE}/api/contract/submit/`, {
+    const res = await auth.authFetch(`${API_BASE}/api/contract/submit/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -122,25 +122,25 @@ async function handleSubmit() {
             <div class="info-section">
               <h4>公司总部</h4>
               <div class="info-row">
-                <span class="info-icon">📍</span>
+                <img src="/contact/dizhi.svg" alt="" class="info-icon" />
                 <span>广东省佛山市顺德区龙江镇工业大道 188 号</span>
               </div>
               <div class="info-row">
-                <span class="info-icon">📞</span>
+                <img src="/contact/dianhua.svg" alt="" class="info-icon" />
                 <div>
                   <p>400-888-6688（全国服务热线）</p>
                   <p>+86-757-2388-6688（国际贸易部）</p>
                 </div>
               </div>
               <div class="info-row">
-                <span class="info-icon">✉️</span>
+                <img src="/contact/youjian.svg" alt="" class="info-icon" />
                 <div>
                   <p>info@shangpin.com（业务咨询）</p>
                   <p>hr@shangpin.com（人才招聘）</p>
                 </div>
               </div>
               <div class="info-row">
-                <span class="info-icon">🕐</span>
+                <img src="/contact/zhongbiao.svg" alt="" class="info-icon" />
                 <div>
                   <p>周一至周六 8:00 - 18:00</p>
                   <p>周日及法定节假日休息</p>
@@ -151,7 +151,7 @@ async function handleSubmit() {
             <div class="info-section">
               <h4>展厅地址</h4>
               <div class="info-row">
-                <span class="info-icon">🏢</span>
+                <img src="/contact/loufang.svg" alt="" class="info-icon" />
                 <div>
                   <p>罗浮宫国际家具博览中心 3 楼 C15-C18</p>
                   <p>深圳国际艺展中心 MALL 2 楼 B23</p>
@@ -176,7 +176,7 @@ async function handleSubmit() {
             <p class="form-subtitle">留下您的需求信息，专属顾问将在 <strong>一个工作日</strong> 内与您联系</p>
 
             <div v-if="submitted" class="form-success">
-              <div class="success-icon">✓</div>
+              <div class="success-icon"><span>✓</span></div>
               <h3>提交成功</h3>
               <p>感谢您的咨询！我们的专属顾问将在一个工作日内与您联系，请保持电话畅通。</p>
             </div>
@@ -232,7 +232,8 @@ async function handleSubmit() {
 
               <p v-if="errorMsg" class="form-error">{{ errorMsg }}</p>
               <button type="submit" class="submit-btn" :disabled="submitting || !form.name || !form.phone">
-                {{ submitting ? '提交中...' : '提交咨询' }}
+                <span v-if="submitting" class="spinner"></span>
+                {{ submitting ? '提交中' : '提交咨询' }}
               </button>
 
               <p class="form-note">* 我们承诺对您的信息严格保密，仅用于业务沟通</p>
@@ -246,7 +247,7 @@ async function handleSubmit() {
     <section class="map-section">
       <div class="map-placeholder">
         <div>
-          <p class="map-icon">📍</p>
+          <img src="/contact/dizhi.svg" alt="" class="map-icon" />
           <p>广东省佛山市顺德区龙江镇工业大道 188 号</p>
           <p class="map-sub">广佛江珠高速龙江出口 5 分钟车程 | 广州白云机场 60 分钟车程</p>
         </div>
@@ -281,8 +282,8 @@ async function handleSubmit() {
 
 .info-section { margin-top: 36px; padding-top: 28px; border-top: 1px solid #eee; }
 .info-section h4 { font-size: 13px; color: var(--gold); letter-spacing: 3px; margin-bottom: 16px; text-transform: uppercase; }
-.info-row { display: flex; gap: 12px; margin-bottom: 14px; font-size: 14px; color: var(--text-light); }
-.info-icon { flex-shrink: 0; font-size: 16px; width: 22px; }
+.info-row { display: flex; gap: 12px; margin-bottom: 14px; font-size: 14px; color: var(--text-light); align-items: center; }
+.info-icon { flex-shrink: 0; width: 20px; height: 20px; }
 .info-row p { margin-bottom: 2px; }
 .info-note { font-size: 12px; color: var(--text-muted); margin-top: 8px; letter-spacing: 1px; }
 .social-links span { display: block; font-size: 13px; color: var(--text-light); margin-bottom: 6px; }
@@ -330,17 +331,18 @@ textarea { resize: vertical; }
 }
 .submit-btn:hover:not(:disabled) { background: #7a5c12; }
 .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; display: inline-block; vertical-align: middle; margin-right: 6px; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
 .form-note { font-size: 11px; color: #bbb; letter-spacing: 1px; margin-top: 4px; }
 .form-error { color: #c00; font-size: 13px; margin-top: 4px; }
 
-.form-success { text-align: center; padding: 40px 20px; }
-.success-icon {
-  width: 60px; height: 60px; margin: 0 auto 20px;
-  background: var(--gold); color: #fff; font-size: 28px;
-  display: flex; align-items: center; justify-content: center;
-}
+.form-success { text-align: center; padding: 40px 20px; animation: fadeInUp .5s ease; }
+.success-icon { width: 64px; height: 64px; margin: 0 auto 20px; background: var(--gold); display: flex; align-items: center; justify-content: center; }
+.success-icon span { font-size: 32px; color: #fff; animation: scaleCheck .4s ease .2s both; }
 .form-success h3 { font-size: 20px; margin-bottom: 12px; }
 .form-success p { font-size: 14px; color: var(--text-light); line-height: 1.8; }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+@keyframes scaleCheck { from { transform:scale(0); } to { transform:scale(1); } }
 
 /* Map */
 .map-section { background: #f5f0e8; }
@@ -353,7 +355,7 @@ textarea { resize: vertical; }
   background: linear-gradient(135deg, #e8e0d5, #d5c9b5);
   color: var(--gold);
 }
-.map-icon { font-size: 36px; margin-bottom: 10px; }
+.map-icon { width: 20px; height: 20px; display: block; }
 .map-placeholder p { font-size: 15px; letter-spacing: 2px; }
 .map-sub { font-size: 13px !important; color: #999 !important; margin-top: 6px !important; }
 

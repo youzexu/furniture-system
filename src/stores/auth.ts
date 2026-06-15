@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-
-const API_BASE = 'http://127.0.0.1:8000'
+import { API_BASE } from '../api'
 
 interface User {
   id: number
@@ -14,7 +13,8 @@ interface User {
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const accessToken = ref<string>('')
-  const refreshToken = ref<string>('')
+  const refreshTokenStr = ref<string>('')
+  const showExpired = ref(false)
 
   const isLoggedIn = computed(() => !!accessToken.value && !!user.value)
 
@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
       try {
         const data = JSON.parse(saved)
         accessToken.value = data.access || ''
-        refreshToken.value = data.refresh || ''
+        refreshTokenStr.value = data.refresh || ''
         user.value = data.user || null
       } catch {}
     }
@@ -34,14 +34,14 @@ export const useAuthStore = defineStore('auth', () => {
   function save() {
     localStorage.setItem('auth', JSON.stringify({
       access: accessToken.value,
-      refresh: refreshToken.value,
+      refresh: refreshTokenStr.value,
       user: user.value,
     }))
   }
 
   function clear() {
     accessToken.value = ''
-    refreshToken.value = ''
+    refreshTokenStr.value = ''
     user.value = null
     localStorage.removeItem('auth')
   }
@@ -55,7 +55,7 @@ export const useAuthStore = defineStore('auth', () => {
     const data = await res.json()
     if (!data.success) throw new Error(data.message)
     accessToken.value = data.access
-    refreshToken.value = data.refresh
+    refreshTokenStr.value = data.refresh
     user.value = data.user
     save()
     return data
@@ -70,7 +70,7 @@ export const useAuthStore = defineStore('auth', () => {
     const data = await res.json()
     if (!data.success) throw new Error(data.message)
     accessToken.value = data.access
-    refreshToken.value = data.refresh
+    refreshTokenStr.value = data.refresh
     user.value = data.user
     save()
     return data
@@ -80,13 +80,30 @@ export const useAuthStore = defineStore('auth', () => {
     clear()
   }
 
+  async function updateProfile(first_name: string, email: string) {
+    await refreshAccessToken()
+    const res = await fetch(`${API_BASE}/api/auth/update/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken.value}`,
+      },
+      body: JSON.stringify({ first_name, email }),
+    })
+    const data = await res.json()
+    if (!data.success) throw new Error(data.message)
+    user.value = data.user
+    save()
+    return data
+  }
+
   async function refreshAccessToken(): Promise<boolean> {
-    if (!refreshToken.value) return false
+    if (!refreshTokenStr.value) return false
     try {
       const res = await fetch(`${API_BASE}/api/auth/refresh/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh: refreshToken.value }),
+        body: JSON.stringify({ refresh: refreshTokenStr.value }),
       })
       const data = await res.json()
       if (data.success) {
@@ -99,8 +116,34 @@ export const useAuthStore = defineStore('auth', () => {
     return false
   }
 
+  async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
+    const doFetch = () => fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${accessToken.value}`,
+      },
+    })
+
+    let res = await doFetch()
+    if (res.status === 401) {
+      const ok = await refreshAccessToken()
+      if (ok) {
+        res = await doFetch()
+      } else {
+        showExpired.value = true
+        throw new Error('登录已过期')
+      }
+    }
+    return res
+  }
+
+  function closeExpired() {
+    showExpired.value = false
+  }
+
   // 初始化时恢复
   restore()
 
-  return { user, accessToken, refreshToken, isLoggedIn, login, register, logout, refreshAccessToken, restore }
+  return { user, accessToken, refreshTokenStr, showExpired, isLoggedIn, login, register, logout, updateProfile, authFetch, refreshAccessToken, closeExpired, restore }
 })

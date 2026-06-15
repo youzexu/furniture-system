@@ -4,7 +4,19 @@ import { useReveal } from '../composables/useReveal'
 
 const { addReveal } = useReveal()
 const visible = ref(false)
-onMounted(() => { setTimeout(() => visible.value = true, 100) })
+const cases = ref<{name:string;type:string;area:string;style:string;desc:string}[]>([])
+import { API_BASE } from '../api'
+
+async function loadCases() {
+  try {
+    const res = await fetch(`${API_BASE}/api/cases/`)
+    const data = await res.json()
+    if (data.success) cases.value = data.data
+  } catch {}
+}
+
+onMounted(() => { setTimeout(() => visible.value = true, 100); loadCases() })
+fetch(`${API_BASE}/api/faqs/`).then(r=>r.json()).then(d=>{ if(d.success) faq.value = d.data }).catch(()=>{})
 
 const flowSteps = [
   { icon:'💬', title:'需求沟通', desc:'专业顾问一对一沟通，深入了解您的设计偏好、空间尺寸、功能需求、预算范围与使用场景。预约后可安排设计师上门测量。' },
@@ -15,22 +27,8 @@ const flowSteps = [
   { icon:'🔧', title:'安装售后', desc:'提供专业上门安装服务，安装完成后由您验收签字。3 年质保期内免费维修，终身维护，7×24 小时客服在线。' },
 ]
 
-const cases = [
-  { name:'上海陆家嘴私宅', type:'全屋定制', area:'380 ㎡', style:'现代轻奢', desc:'客厅、餐厅、主卧、衣帽间全屋家具定制，采用胡桃木 + 黄铜元素，整体色调以米灰与深棕为主，打造低调奢华的居住氛围。' },
-  { name:'深圳湾壹号会所', type:'会所家具', area:'1,200 ㎡', style:'新中式', desc:'大堂、VIP 包房、茶室、雪茄吧全套家具设计与制造，融入岭南建筑文化元素，营造东方雅韵的社交空间。' },
-  { name:'成都麓湖别墅', type:'别墅定制', area:'520 ㎡', style:'意式极简', desc:'全案家具定制，包含 5 间卧室、3 个起居空间、私人酒窖与影音室。以利落线条和天然材质诠释意式生活美学。' },
-  { name:'三亚艾迪逊酒店', type:'酒店工程', area:'15,000 ㎡', style:'度假轻奢', desc:'客房及公区家具批量定制，藤编 + 原木 + 亚麻，融合热带度假风情，450 间客房 60 天完成交付。' },
-  { name:'北京国贸办公室', type:'办公定制', area:'2,000 ㎡', style:'现代简约', desc:'高管办公室 + 开放工区 + 大中小会议室全套家具，智能升降桌 + 人体工学椅，打造高效健康的办公环境。' },
-  { name:'杭州云栖玫瑰园', type:'庭院家具', area:'260 ㎡', style:'宋韵美学', desc:'中式庭院户外家具定制，缅甸柚木 + 316 不锈钢五金，适配江南园林风格，防晒防雨耐候设计。' },
-]
 
-const faq = [
-  { q:'定制家具的起订量是多少？', a:'单件起订。无论是一张边几还是一个酒店项目，我们都以同样的匠心对待。' },
-  { q:'定制周期需要多长时间？', a:'一般项目 25-45 天（含设计+生产）。大型工程根据体量另议，我们会给出明确的时间表。' },
-  { q:'可以来工厂参观吗？', a:'当然可以。我们欢迎您预约参观工厂和展厅，亲眼见证从原木到成品的全过程。' },
-  { q:'售后服务如何保障？', a:'3 年质保期内免费维修（人为损坏除外），终身维护。全国 300+ 城市可上门服务。' },
-  { q:'可以按我们提供的图纸生产吗？', a:'完全没问题。我们支持按客户提供的设计图纸或参考图片进行定制生产。' },
-]
+const faq = ref<{q:string;a:string}[]>([])
 </script>
 
 <template>

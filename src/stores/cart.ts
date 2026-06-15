@@ -59,6 +59,16 @@ export const useCartStore = defineStore('cart', () => {
     save()
   }
 
+  const pendingCheckout = ref(false)
+
+  function triggerCheckout() {
+    pendingCheckout.value = true
+  }
+
+  function clearPendingCheckout() {
+    pendingCheckout.value = false
+  }
+
   restore()
-  return { items, totalItems, totalPrice, addItem, removeItem, setQuantity, clear }
+  return { items, totalItems, totalPrice, pendingCheckout, addItem, removeItem, setQuantity, clear, triggerCheckout, clearPendingCheckout }
 })
