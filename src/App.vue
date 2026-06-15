@@ -2,18 +2,26 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
+import { API_BASE } from './api'
 import NavBar from './components/NavBar.vue'
 import AppFooter from './components/AppFooter.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
 const showBackTop = ref(false)
+const announcements = ref<{ text: string; link: string }[]>([])
+const showAnnounce = ref(false)
 
 function onScroll() {
   showBackTop.value = window.scrollY > 400
 }
 
-onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
+onMounted(() => {
+  window.addEventListener('scroll', onScroll, { passive: true })
+  fetch(`${API_BASE}/api/announcements/`).then(r => r.json()).then(d => {
+    if (d.success && d.data.length > 0) { announcements.value = d.data; showAnnounce.value = true }
+  }).catch(() => {})
+})
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
 function goLogin() {
@@ -29,6 +37,16 @@ function scrollToTop() {
 <template>
   <div class="app-wrapper">
     <NavBar />
+
+    <div v-if="showAnnounce" class="announce-bar">
+      <span v-for="(a, i) in announcements" :key="i">
+        <a v-if="a.link" :href="a.link">{{ a.text }}</a>
+        <span v-else>{{ a.text }}</span>
+        <span v-if="i < announcements.length - 1" class="announce-sep">｜</span>
+      </span>
+    </div>
+    <div v-else class="announce-bar" style="background:#fff3cd;color:#856404">测试公告：渲染正常，API未加载</div>
+
     <main class="page-content">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
@@ -63,6 +81,9 @@ function scrollToTop() {
 .expired-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
 .btn-primary { padding: 12px 32px; background: var(--gold); color: #fff; border: none; font-size: 14px; letter-spacing: 3px; cursor: pointer; font-family: inherit; transition: background 0.3s; }
 .btn-primary:hover { background: #7a5c12; }
+.announce-bar { background: #faf7f2; text-align: center; padding: 8px 20px; font-size: 13px; color: var(--gold); letter-spacing: 2px; border-bottom: 1px solid #f0e8d8; margin-top: 72px; }
+.announce-bar a { color: var(--gold); }
+.announce-sep { color: #ddd; margin: 0 8px; }
 .back-top { position: fixed; bottom: 40px; right: 40px; width: 44px; height: 44px; background: var(--dark); color: #fff; border: none; font-size: 20px; cursor: pointer; z-index: 150; display: flex; align-items: center; justify-content: center; transition: background 0.3s, opacity 0.3s; }
 .back-top:hover { background: var(--gold); }
 </style>

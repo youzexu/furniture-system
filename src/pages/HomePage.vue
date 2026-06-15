@@ -1,31 +1,26 @@
 <script setup lang="ts">
 import { onMounted, ref, onUnmounted } from 'vue'
+import { API_BASE } from '../api'
 
 const visible = ref(false)
-const stats = ref<string[]>(['0', '0', '0', '0'])
+const banners = ref<{title:string;image:string;link:string}[]>([])
+const bannerIndex = ref(0)
+let bannerTimer: ReturnType<typeof setInterval> | null = null
+
 onMounted(() => {
   setTimeout(() => visible.value = true, 100)
-  setTimeout(() => {
-    const targets = [23, 30000, 200, 50]
-    const suffixes = ['+', '', '+', '+']
-    const duration = 2000
-    const start = Date.now()
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - start
-      const progress = Math.min(elapsed / duration, 1)
-      targets.forEach((t, i) => {
-        stats.value[i] = Math.floor(t * progress).toLocaleString() + suffixes[i]
-      })
-      if (progress >= 1) clearInterval(interval)
-    }, 40)
-  }, 500)
+  // Fetch banners
+  fetch(`${API_BASE}/api/banners/`).then(r => r.json()).then(d => {
+    if (d.success && d.data.length > 0) {
+      banners.value = d.data
+      if (d.data.length > 1) bannerTimer = setInterval(() => { bannerIndex.value = (bannerIndex.value + 1) % d.data.length }, 4000)
+    }
+  }).catch(() => {})
+  setTimeout(() => visible.value = true, 100)
   fetch(`${API_BASE}/api/partners/`).then(r => r.json()).then(d => { if (d.success) partners.value = d.data }).catch(() => {})
   fetch(`${API_BASE}/api/testimonials/`).then(r => r.json()).then(d => { if (d.success) testimonials.value = d.data }).catch(() => {})
 })
 
-function scrollTo(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-}
 
 // Scroll-triggered reveal
 const reveals = ref<HTMLElement[]>([])
@@ -42,7 +37,7 @@ function onScroll() {
 }
 
 onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
-onUnmounted(() => window.removeEventListener('scroll', onScroll))
+onUnmounted(() => { window.removeEventListener('scroll', onScroll); if (bannerTimer) clearInterval(bannerTimer) })
 
 const advantages = [
   { icon: '', title: '原木直采', desc: '与全球优质林场建立长期合作，从源头把控木材品质，FSC 认证保障可持续性，精选北美白橡、欧洲榉木、东南亚柚木等优质原材。' },
@@ -54,30 +49,45 @@ const advantages = [
 ]
 
 const partners = ref<string[]>([])
+
 const testimonials = ref<{name:string;role:string;text:string}[]>([])
-import { API_BASE } from '../api'
 </script>
 
 <template>
   <div class="page-fade" :class="{ show: visible }">
 
+    <!-- ===== Hero / 轮播 ===== -->
+    <HeroBanner />
+
     <!-- ===== Hero ===== -->
-    <section class="hero">
+    <section v-if="banners.length > 0" class="hero-split">
+      <div class="hero-left">
+        <p class="hero-tag">— SOURCE FACTORY · SINCE 2001 —</p>
+        <h1 class="hero-title">以工艺之名<br>定义家居美学</h1>
+        <p class="hero-sub">二十三年专注高端家具制造<br>从原木到成品，每一件都是对品质的承诺</p>
+        <div class="hero-actions">
+          <router-link to="/products" class="btn-primary">浏览产品</router-link>
+          <router-link to="/contact" class="btn-outline">联系我们</router-link>
+        </div>
+      </div>
+      <div class="hero-right">
+        <img :src="'http://127.0.0.1:8000' + banners[bannerIndex].image" alt="" class="hero-carousel-img" />
+        <div v-if="banners.length > 1" class="hero-carousel-dots">
+          <span v-for="(_b, i) in banners" :key="i" :class="{active: i===bannerIndex}" @click="bannerIndex=i"></span>
+        </div>
+      </div>
+    </section>
+
+    <section v-else class="hero">
       <div class="hero-bg"></div>
       <div class="hero-content">
         <p class="hero-tag">— SOURCE FACTORY · SINCE 2001 —</p>
         <h1 class="hero-title">以工艺之名<br>定义家居美学</h1>
         <p class="hero-sub">二十三年专注高端家具制造<br>从原木到成品，每一件都是对品质的承诺</p>
         <div class="hero-actions">
-          <a href="#" class="btn-primary" @click.prevent="scrollTo('categories')">浏览产品</a>
+          <router-link to="/products" class="btn-primary">浏览产品</router-link>
           <router-link to="/contact" class="btn-outline">联系我们</router-link>
         </div>
-      </div>
-      <div class="hero-stats">
-        <div class="hero-stat"><b>{{ stats[0] }}</b><span>年行业深耕</span></div>
-        <div class="hero-stat"><b>{{ stats[1] }}</b><span>㎡ 智造基地</span></div>
-        <div class="hero-stat"><b>{{ stats[2] }}</b><span>资深匠人</span></div>
-        <div class="hero-stat"><b>{{ stats[3] }}</b><span>出口国家</span></div>
       </div>
     </section>
 
@@ -193,8 +203,8 @@ import { API_BASE } from '../api'
 <style scoped>
 /* Hero */
 .hero {
-  height: 100vh;
-  min-height: 700px;
+  height: 80vh;
+  min-height: 520px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -212,9 +222,9 @@ import { API_BASE } from '../api'
 }
 .hero-content { position: relative; z-index: 1; max-width: 780px; padding: 0 40px; }
 .hero-tag { font-size: 12px; letter-spacing: 6px; color: var(--gold-light); margin-bottom: 20px; }
-.hero-title { font-size: 64px; font-weight: 300; line-height: 1.2; letter-spacing: 8px; margin-bottom: 24px; font-family: 'Noto Serif SC', serif; }
-.hero-sub { font-size: 16px; line-height: 1.8; color: rgba(255,255,255,0.65); letter-spacing: 2px; }
-.hero-actions { margin-top: 40px; display: flex; gap: 20px; justify-content: center; }
+.hero-title { font-size: 64px; font-weight: 300; line-height: 1.2; letter-spacing: 8px; margin-bottom: 24px; font-family: 'Noto Serif SC', serif; white-space: pre-line; }
+.hero-sub { font-size: 16px; line-height: 1.8; color: rgba(255,255,255,0.65); letter-spacing: 2px; white-space: pre-line; }
+.hero-actions { margin-top: 40px; display: flex; gap: 20px; justify-content: flex-start; }
 .hero-stats {
   position: absolute;
   bottom: 60px;
@@ -314,6 +324,23 @@ import { API_BASE } from '../api'
 .cta-content h2 { font-size: 34px; font-weight: 300; letter-spacing: 6px; margin-bottom: 16px; font-family: 'Noto Serif SC', serif; }
 .cta-content p { font-size: 14px; color: rgba(255,255,255,0.6); letter-spacing: 2px; margin-bottom: 36px; }
 
+
+/* Hero Split (banners) */
+.hero-split { display: flex; height: 80vh; min-height: 520px; margin-top: 72px; }
+.hero-left { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 80px 60px; background: #fff; }
+.hero-left .hero-tag { color: var(--gold); }
+.hero-left .hero-title { color: var(--dark); }
+.hero-left .hero-sub { color: var(--text-light); }
+.hero-left .btn-primary { padding: 14px 40px; background: var(--gold); color: #fff; font-size: 14px; letter-spacing: 3px; border: none; cursor: pointer; text-decoration: none; transition: background .3s; }
+.hero-left .btn-primary:hover { background: #7a5c12; }
+.hero-left .btn-outline { padding: 14px 40px; border: 1px solid var(--gold); color: var(--gold); font-size: 14px; letter-spacing: 3px; text-decoration: none; transition: all .3s; }
+.hero-left .btn-outline:hover { background: var(--gold); color: #fff; }
+.hero-right { flex: 1; position: relative; overflow: hidden; background: #1a1a1a; }
+.hero-carousel-img { width: 100%; height: 100%; object-fit: cover; transition: opacity .5s; }
+.hero-carousel-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+.hero-carousel-dots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.4); cursor: pointer; transition: background .3s; }
+.hero-carousel-dots span.active { background: #fff; }
+@media (max-width:768px) { .hero-split { flex-direction: column; height: auto; } .hero-left { padding: 60px 30px; } .hero-right { height: 50vh; } }
 @media (max-width: 768px) {
   .hero-title { font-size: 36px; }
   .hero-stats { gap: 30px; }

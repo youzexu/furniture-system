@@ -115,7 +115,22 @@ router.beforeEach((to, _from, next) => {
 });
 
 router.afterEach((to) => {
-  document.title = (to.meta.title as string) ? `${to.meta.title} - 尚品工坊` : '尚品工坊 | 家具源头工厂'
+  const name = (to.meta.title as string) || ''
+  document.title = name ? `${name} - 尚品工坊` : '尚品工坊 | 家具源头工厂 · 高端定制专家'
+
+  // Update meta description from SEO config (loaded once)
+  const seoData = (window as any).__seoConfig
+  if (seoData) {
+    const key = to.name as string
+    const desc = seoData[`${key}_desc`] || seoData.home_desc || ''
+    const meta = document.querySelector('meta[name="description"]')
+    if (meta && desc) meta.setAttribute('content', desc)
+  }
 })
+
+// Load SEO config
+fetch('http://127.0.0.1:8000/api/seo-config/').then(r => r.json()).then(d => {
+  if (d.success) (window as any).__seoConfig = d.data
+}).catch(() => {})
 
 export default router;
