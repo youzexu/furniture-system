@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { API_BASE } from '../api'
+import { useReveal } from '../composables/useReveal'
 
+const { addReveal } = useReveal()
 const visible = ref(false)
 const heroTitle = ref('以工艺之名\n定义家居美学')
 const heroSub = ref('二十三年专注高端家具制造\n从原木到成品，每一件都是对品质的承诺')
@@ -19,7 +21,6 @@ onMounted(() => {
   fetch(`${API_BASE}/api/site-config/`).then(r => r.json()).then(d => {
     if (d.success) { heroTitle.value = d.data.hero_title; heroSub.value = d.data.hero_sub }
   }).catch(() => {})
-  setTimeout(() => visible.value = true, 100)
   fetch(`${API_BASE}/api/partners/`).then(r => r.json()).then(d => { if (d.success) partners.value = d.data }).catch(() => {})
   fetch(`${API_BASE}/api/banners/`).then(r => r.json()).then(d => {
     if (d.success && d.data.length > 0) {
@@ -29,23 +30,6 @@ onMounted(() => {
   }).catch(() => {})
   fetch(`${API_BASE}/api/testimonials/`).then(r => r.json()).then(d => { if (d.success) testimonials.value = d.data }).catch(() => {})
 })
-
-
-// Scroll-triggered reveal
-const reveals = ref<HTMLElement[]>([])
-
-function addReveal(el: unknown) {
-  if (el instanceof HTMLElement) reveals.value.push(el)
-}
-
-function onScroll() {
-  reveals.value.forEach(el => {
-    const top = el.getBoundingClientRect().top
-    if (top < window.innerHeight - 80) el.classList.add('revealed')
-  })
-}
-
-onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
 
 const advantages = [
   { icon: '', title: '原木直采', desc: '与全球优质林场建立长期合作，从源头把控木材品质，FSC 认证保障可持续性，精选北美白橡、欧洲榉木、东南亚柚木等优质原材。' },

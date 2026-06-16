@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
@@ -14,8 +14,27 @@ const mobileMenuOpen = ref(false)
 const scrolled = ref(false)
 
 function onScroll() { scrolled.value = window.scrollY > 50 }
-onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
+const showRecentPop = ref(false)
+const recentItems = ref<{code:string;name:string}[]>([])
+
+onMounted(() => {
+  window.addEventListener('scroll', onScroll, { passive: true })
+  loadRecentViews()
+})
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
+
+function loadRecentViews() {
+  const saved = localStorage.getItem('recentViews')
+  if (saved) recentItems.value = JSON.parse(saved)
+}
+
+// SPA 路由切换时重新读取浏览记录
+watch(() => route.path, () => loadRecentViews())
+
+function removeRecentItem(code: string) {
+  recentItems.value = recentItems.value.filter(r => r.code !== code)
+  localStorage.setItem('recentViews', JSON.stringify(recentItems.value))
+}
 
 const navItems = [
   { path: '/', label: '首页' },
@@ -65,6 +84,21 @@ async function confirmLogout() {
 
       <!-- 认证区域 -->
       <div class="auth-area">
+        <!-- 最近浏览 -->
+        <div class="recent-menu">
+          <div v-if="showRecentPop" class="cart-backdrop" @click="showRecentPop = false"></div>
+          <button class="recent-trigger" @click="showRecentPop = !showRecentPop" title="最近浏览">🕐</button>
+          <div v-if="showRecentPop" class="cart-pop" @click.stop>
+            <div v-if="recentItems.length === 0" class="cart-pop-empty">暂无浏览记录</div>
+            <div v-else class="cart-pop-items">
+              <div class="cart-pop-item" v-for="(r, i) in recentItems" :key="i">
+                <router-link :to="'/products/'+r.code" class="cip-name" @click="showRecentPop = false">{{ r.name }}</router-link>
+                <button class="cip-del" @click="removeRecentItem(r.code)">×</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- 购物车 -->
         <div class="cart-menu">
           <div v-if="showCartPop" class="cart-backdrop" @click="showCartPop = false"></div>
@@ -324,6 +358,16 @@ async function confirmLogout() {
   border-color: var(--gold);
   color: var(--gold);
 }
+
+.recent-menu { position: relative; }
+.recent-trigger {
+  background: none; border: 1px solid #eee; padding: 0;
+  width: 42px; height: 36px; font-size: 16px; cursor: pointer;
+  color: var(--text); display: flex; align-items: center;
+  justify-content: center; transition: all 0.3s;
+  font-family: inherit; margin-right: 4px;
+}
+.recent-trigger:hover { border-color: var(--gold); color: var(--gold); }
 
 .orders-btn {
   display: inline-flex;

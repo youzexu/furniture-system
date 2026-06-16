@@ -1,86 +1,70 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomePage from "../pages/HomePage.vue";
-import ProductsPage from "../pages/ProductsPage.vue";
-import FactoryPage from "../pages/FactoryPage.vue";
-import CustomPage from "../pages/CustomPage.vue";
-import ContactPage from "../pages/ContactPage.vue";
-import LoginPage from "../pages/LoginPage.vue";
-import RegisterPage from "../pages/RegisterPage.vue";
-
-import ShopPage from "../pages/ShopPage.vue";
-
-import OrdersPage from "../pages/OrdersPage.vue";
-import ProfilePage from "../pages/ProfilePage.vue";
-import AboutPage from "../pages/AboutPage.vue";
-import ProductDetailPage from "../pages/ProductDetailPage.vue";
 
 const routes = [
-  { path: "/", name: "home", component: HomePage, meta: { title: "首页" } },
   {
-    path: "/shop",
-    name: "shop",
-    component: ShopPage,
+    path: "/", name: "home",
+    component: () => import(/* webpackPrefetch: true */ "../pages/HomePage.vue"),
+    meta: { title: "首页" },
+  },
+  {
+    path: "/shop", name: "shop",
+    component: () => import(/* webpackPrefetch: true */ "../pages/ShopPage.vue"),
     meta: { title: "成品购买" },
   },
   {
-    path: "/products",
-    name: "products",
-    component: ProductsPage,
+    path: "/products", name: "products",
+    component: () => import(/* webpackPrefetch: true */ "../pages/ProductsPage.vue"),
     meta: { title: "产品" },
   },
   {
-    path: "/products/:code",
-    name: "product-detail",
-    component: ProductDetailPage,
+    path: "/products/:code", name: "product-detail",
+    component: () => import("../pages/ProductDetailPage.vue"),
     meta: { title: "产品详情" },
   },
   {
-    path: "/about",
-    name: "about",
-    component: AboutPage,
+    path: "/about", name: "about",
+    component: () => import("../pages/AboutPage.vue"),
     meta: { title: "关于我们" },
   },
   {
-    path: "/factory",
-    name: "factory",
-    component: FactoryPage,
+    path: "/factory", name: "factory",
+    component: () => import("../pages/FactoryPage.vue"),
     meta: { title: "工厂" },
   },
   {
-    path: "/custom",
-    name: "custom",
-    component: CustomPage,
+    path: "/custom", name: "custom",
+    component: () => import("../pages/CustomPage.vue"),
     meta: { title: "定制" },
   },
   {
-    path: "/contact",
-    name: "contact",
-    component: ContactPage,
+    path: "/contact", name: "contact",
+    component: () => import("../pages/ContactPage.vue"),
     meta: { title: "联系" },
   },
   {
-    path: "/login",
-    name: "login",
-    component: LoginPage,
+    path: "/login", name: "login",
+    component: () => import("../pages/LoginPage.vue"),
     meta: { title: "登录", guest: true },
   },
   {
-    path: "/register",
-    name: "register",
-    component: RegisterPage,
+    path: "/register", name: "register",
+    component: () => import("../pages/RegisterPage.vue"),
     meta: { title: "注册", guest: true },
   },
   {
-    path: "/orders",
-    name: "orders",
-    component: OrdersPage,
+    path: "/orders", name: "orders",
+    component: () => import("../pages/OrdersPage.vue"),
     meta: { title: "我的订单", requiresAuth: true },
   },
   {
-    path: "/profile",
-    name: "profile",
-    component: ProfilePage,
+    path: "/profile", name: "profile",
+    component: () => import("../pages/ProfilePage.vue"),
     meta: { title: "个人中心", requiresAuth: true },
+  },
+  {
+    path: "/:pathMatch(.*)*", name: "not-found",
+    component: () => import("../pages/NotFoundPage.vue"),
+    meta: { title: "页面不存在" },
   },
 ];
 

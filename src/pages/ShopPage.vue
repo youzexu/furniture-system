@@ -257,7 +257,7 @@ const { step, submitting, submitted, orderForm, fieldErrors, nextStep } = useChe
 
             <div class="order-review">
               <div class="review-item" v-for="item in cart.items" :key="item.code">
-                <img :src="productImageSrc(item)" :alt="item.name" class="review-img"
+                <img :src="productImageSrc(item)" :alt="item.name" class="review-img" loading="lazy"
                   @error="e => onImgError(e, item.code)" />
                 <div class="review-info">
                   <h4>{{ item.name }}</h4>

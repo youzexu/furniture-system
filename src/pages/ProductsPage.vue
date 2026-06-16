@@ -16,6 +16,17 @@ onMounted(() => {
 
 const activeCat = ref('all')
 const searchQuery = ref('')
+const recentViews = ref<{code:string;name:string}[]>([])
+
+onMounted(() => {
+  const saved = localStorage.getItem('recentViews')
+  if (saved) recentViews.value = JSON.parse(saved)
+})
+
+function removeRecent(code: string) {
+  recentViews.value = recentViews.value.filter(p => p.code !== code)
+  localStorage.setItem('recentViews', JSON.stringify(recentViews.value))
+}
 
 let debounceTimer: ReturnType<typeof setTimeout>
 async function onSearch() {
@@ -93,7 +104,7 @@ const filtered = computed(() => activeCat.value === 'all' ? products.value : pro
         <div class="product-grid">
           <div class="product-card" v-for="p in filtered" :key="p.code" @click="$router.push('/products/' + p.code)">
             <div class="product-image">
-              <img :src="'/images/products/' + p.code + '.svg'" :alt="p.name" class="product-img" />
+              <img :src="'/images/products/' + p.code + '.svg'" :alt="p.name" class="product-img" loading="lazy" />
               <div class="product-overlay">
                 <span>查看详情</span>
               </div>
@@ -108,6 +119,20 @@ const filtered = computed(() => activeCat.value === 'all' ? products.value : pro
                 <span class="product-tag" v-if="p.cat === 'hotel'">工程定制</span>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 最近浏览 -->
+    <section v-if="recentViews.length > 0" class="section" style="padding-top:0">
+      <div class="container">
+        <p class="section-label">RECENTLY VIEWED</p>
+        <h2 class="section-title">最近浏览</h2>
+        <div class="recent-row">
+          <div class="recent-item" v-for="p in recentViews" :key="p.code" @click="$router.push('/products/'+p.code)">
+            <span class="recent-name">{{ p.name }}</span>
+            <button class="recent-del" @click.stop="removeRecent(p.code)">×</button>
           </div>
         </div>
       </div>
@@ -179,4 +204,10 @@ const filtered = computed(() => activeCat.value === 'all' ? products.value : pro
 .product-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #f0f0f0; }
 .product-price { font-size: 15px; color: var(--gold); font-weight: 500; }
 .product-tag { padding: 3px 8px; background: var(--gold); color: #fff; font-size: 10px; letter-spacing: 1px; }
+.recent-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.recent-item { padding: 10px 20px; border: 1px solid #eee; cursor: pointer; transition: all .3s; }
+.recent-item:hover { border-color: var(--gold); }
+.recent-del { background: none; border: none; color: #ccc; font-size: 14px; cursor: pointer; padding: 0 0 0 8px; transition: color .3s; }
+.recent-del:hover { color: #c00; }
+.recent-name { font-size: 13px; color: var(--text); letter-spacing: 1px; }
 </style>

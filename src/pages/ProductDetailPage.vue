@@ -2,11 +2,12 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
+import { API_BASE } from '../api'
+import { request } from '../utils/request'
 
 const route = useRoute()
 const router = useRouter()
 const cart = useCartStore()
-import { API_BASE } from '../api'
 
 interface Product { code:string; name:string; cat:string; material:string; size:string; price:string; priceNum:number; desc:string; details:string[]; image:string; tag:string }
 const product = ref<Product | null>(null)
@@ -15,13 +16,22 @@ const toastMsg = ref('')
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${API_BASE}/api/products/`)
+    const res = await request(`${API_BASE}/api/products/`)
     const data = await res.json()
     if (data.success) {
       product.value = data.data.find((p: Product) => p.code === route.params.code) || null
     }
   } catch {}
   loading.value = false
+  // Save to recent views
+  if (product.value) {
+    const saved = localStorage.getItem('recentViews')
+    let views: Product[] = saved ? JSON.parse(saved) : []
+    views = views.filter(p => p.code !== product.value!.code)
+    views.unshift(product.value)
+    views = views.slice(0, 5)
+    localStorage.setItem('recentViews', JSON.stringify(views))
+  }
 })
 
 function goBack() { router.back() }
@@ -33,6 +43,13 @@ function addToCart() {
   setTimeout(() => toastMsg.value = '', 2000)
   setTimeout(goBack, 600)
 }
+
+function shareProduct() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    toastMsg.value = '链接已复制'
+    setTimeout(() => toastMsg.value = '', 2000)
+  }).catch(() => {})
+}
 </script>
 
 <template>
@@ -41,6 +58,8 @@ function addToCart() {
     <div v-if="loading" class="state-box"><span>⏳</span><p>加载中...</p></div>
     <div v-else-if="!product" class="state-box"><span>⚠️</span><p>产品不存在</p><button class="btn-back" @click="goBack">返回</button></div>
     <div v-else class="detail-content">
+      <nav class="breadcrumb"><router-link to="/">首页</router-link> / <router-link to="/products">产品</router-link> / <span>{{ product.name }}</span></nav>
+      <button class="share-btn" @click="shareProduct" title="分享链接">🔗</button>
       <button class="back-btn" @click="goBack">← 返回</button>
       <div class="detail-grid">
         <div class="detail-image">
@@ -78,6 +97,12 @@ function addToCart() {
 .btn-back:hover { background:var(--gold); color:#fff; }
 .back-btn { display:inline-block; margin:30px 40px 0; background:none; border:none; font-size:14px; color:var(--text-muted); cursor:pointer; letter-spacing:2px; transition:color .3s; font-family:inherit; }
 .back-btn:hover { color:var(--gold); }
+.share-btn { background: none; border: 1px solid #eee; padding: 6px 12px; font-size: 14px; cursor: pointer; float: right; margin-left: 10px; color: var(--text-muted); transition: all .3s; }
+.share-btn:hover { border-color: var(--gold); color: var(--gold); }
+.breadcrumb { padding: 30px 0 0; font-size: 13px; color: var(--text-muted); }
+.breadcrumb a { color: var(--text-muted); transition: color .3s; }
+.breadcrumb a:hover { color: var(--gold); }
+.breadcrumb span { color: var(--text); }
 .detail-content { max-width:1100px; margin:0 auto; padding:0 40px 80px; }
 .detail-grid { display:flex; gap:60px; margin-top:20px; }
 .detail-image { flex:1; background:var(--bg-warm); min-height:400px; overflow:hidden; }
