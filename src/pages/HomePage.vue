@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, onUnmounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { API_BASE } from '../api'
-import HeroBanner from '../components/HeroBanner.vue'
 
 const visible = ref(false)
-const banners = ref<{title:string;image:string;link:string}[]>([])
-const bannerIndex = ref(0)
 const heroTitle = ref('以工艺之名\n定义家居美学')
 const heroSub = ref('二十三年专注高端家具制造\n从原木到成品，每一件都是对品质的承诺')
-let bannerTimer: ReturnType<typeof setInterval> | null = null
+const banners = ref<{title:string;image:string;link:string}[]>([])
+const bannerIndex = ref(0)
 
 const homeCategories = ref<{key:string;name:string;desc:string;image:string}[]>([])
 
@@ -21,15 +19,14 @@ onMounted(() => {
   fetch(`${API_BASE}/api/site-config/`).then(r => r.json()).then(d => {
     if (d.success) { heroTitle.value = d.data.hero_title; heroSub.value = d.data.hero_sub }
   }).catch(() => {})
-  // Fetch banners
-  fetch(`${API_BASE}/api/banners/`).then(r => r.json()).then(d => {
-    if (d.success && d.data.length > 0) {
-      banners.value = d.data
-      if (d.data.length > 1) bannerTimer = setInterval(() => { bannerIndex.value = (bannerIndex.value + 1) % d.data.length }, 4000)
-    }
-  }).catch(() => {})
   setTimeout(() => visible.value = true, 100)
   fetch(`${API_BASE}/api/partners/`).then(r => r.json()).then(d => { if (d.success) partners.value = d.data }).catch(() => {})
+  fetch(`${API_BASE}/api/banners/`).then(r => r.json()).then(d => {
+    if (d.success && d.data.length > 0) {
+      if (d.data.length > 1) setInterval(() => { bannerIndex.value = (bannerIndex.value + 1) % d.data.length }, 4000)
+      banners.value = d.data
+    }
+  }).catch(() => {})
   fetch(`${API_BASE}/api/testimonials/`).then(r => r.json()).then(d => { if (d.success) testimonials.value = d.data }).catch(() => {})
 })
 
@@ -49,7 +46,6 @@ function onScroll() {
 }
 
 onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
-onUnmounted(() => { window.removeEventListener('scroll', onScroll); if (bannerTimer) clearInterval(bannerTimer) })
 
 const advantages = [
   { icon: '', title: '原木直采', desc: '与全球优质林场建立长期合作，从源头把控木材品质，FSC 认证保障可持续性，精选北美白橡、欧洲榉木、东南亚柚木等优质原材。' },
@@ -69,7 +65,8 @@ const testimonials = ref<{name:string;role:string;text:string}[]>([])
   <div class="page-fade" :class="{ show: visible }">
 
     <!-- ===== Hero / 轮播 ===== -->
-    <HeroBanner />
+
+
 
     <!-- ===== Hero ===== -->
     <section v-if="banners.length > 0" class="hero-split">
@@ -102,7 +99,6 @@ const testimonials = ref<{name:string;role:string;text:string}[]>([])
         </div>
       </div>
     </section>
-
     <!-- ===== 品牌故事 ===== -->
     <section class="section">
       <div class="container">
@@ -330,7 +326,7 @@ const testimonials = ref<{name:string;role:string;text:string}[]>([])
 .cta-content p { font-size: 14px; color: rgba(255,255,255,0.6); letter-spacing: 2px; margin-bottom: 36px; }
 
 
-/* Hero Split (banners) */
+/* Hero Split */
 .hero-split { display: flex; height: 80vh; min-height: 520px; margin-top: 72px; }
 .hero-left { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 80px 60px; background: #fff; }
 .hero-left .hero-tag { color: var(--gold); }
@@ -346,13 +342,4 @@ const testimonials = ref<{name:string;role:string;text:string}[]>([])
 .hero-carousel-dots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.4); cursor: pointer; transition: background .3s; }
 .hero-carousel-dots span.active { background: #fff; }
 @media (max-width:768px) { .hero-split { flex-direction: column; height: auto; } .hero-left { padding: 60px 30px; } .hero-right { height: 50vh; } }
-@media (max-width: 768px) {
-  .hero-title { font-size: 36px; }
-  .hero-stats { gap: 30px; }
-  .hero-stat b { font-size: 28px; }
-  .intro-grid { flex-direction: column; }
-  .category-grid { grid-template-columns: 1fr; }
-  .adv-grid { grid-template-columns: 1fr; }
-  .testimonial-grid { grid-template-columns: 1fr; }
-}
 </style>
