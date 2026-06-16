@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, onUnmounted } from 'vue'
 import { API_BASE } from '../api'
+import HeroBanner from '../components/HeroBanner.vue'
 
 const visible = ref(false)
 const banners = ref<{title:string;image:string;link:string}[]>([])
