@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useReveal } from '../composables/useReveal'
 import { API_BASE } from '../api'
 
 const { addReveal } = useReveal()
 const visible = ref(false)
-onMounted(() => { setTimeout(() => visible.value = true, 100); loadProducts(); fetchCategories() })
+const route = useRoute()
+onMounted(() => {
+  setTimeout(() => visible.value = true, 100)
+  loadProducts()
+  fetchCategories()
+  if (route.query.cat) activeCat.value = route.query.cat as string
+})
 
 const activeCat = ref('all')
 const searchQuery = ref('')

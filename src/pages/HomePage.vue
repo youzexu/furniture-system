@@ -5,10 +5,21 @@ import { API_BASE } from '../api'
 const visible = ref(false)
 const banners = ref<{title:string;image:string;link:string}[]>([])
 const bannerIndex = ref(0)
+const heroTitle = ref('以工艺之名\n定义家居美学')
+const heroSub = ref('二十三年专注高端家具制造\n从原木到成品，每一件都是对品质的承诺')
 let bannerTimer: ReturnType<typeof setInterval> | null = null
+
+const homeCategories = ref<{key:string;name:string;desc:string;image:string}[]>([])
 
 onMounted(() => {
   setTimeout(() => visible.value = true, 100)
+  fetch(`${API_BASE}/api/categories/`).then(r => r.json()).then(d => {
+    if (d.success) homeCategories.value = d.data
+  }).catch(() => {})
+  // Fetch site config for hero text
+  fetch(`${API_BASE}/api/site-config/`).then(r => r.json()).then(d => {
+    if (d.success) { heroTitle.value = d.data.hero_title; heroSub.value = d.data.hero_sub }
+  }).catch(() => {})
   // Fetch banners
   fetch(`${API_BASE}/api/banners/`).then(r => r.json()).then(d => {
     if (d.success && d.data.length > 0) {
@@ -63,8 +74,8 @@ const testimonials = ref<{name:string;role:string;text:string}[]>([])
     <section v-if="banners.length > 0" class="hero-split">
       <div class="hero-left">
         <p class="hero-tag">— SOURCE FACTORY · SINCE 2001 —</p>
-        <h1 class="hero-title">以工艺之名<br>定义家居美学</h1>
-        <p class="hero-sub">二十三年专注高端家具制造<br>从原木到成品，每一件都是对品质的承诺</p>
+        <h1 class="hero-title">{{ heroTitle }}</h1>
+        <p class="hero-sub">{{ heroSub }}</p>
         <div class="hero-actions">
           <router-link to="/products" class="btn-primary">浏览产品</router-link>
           <router-link to="/contact" class="btn-outline">联系我们</router-link>
@@ -82,8 +93,8 @@ const testimonials = ref<{name:string;role:string;text:string}[]>([])
       <div class="hero-bg"></div>
       <div class="hero-content">
         <p class="hero-tag">— SOURCE FACTORY · SINCE 2001 —</p>
-        <h1 class="hero-title">以工艺之名<br>定义家居美学</h1>
-        <p class="hero-sub">二十三年专注高端家具制造<br>从原木到成品，每一件都是对品质的承诺</p>
+        <h1 class="hero-title">{{ heroTitle }}</h1>
+        <p class="hero-sub">{{ heroSub }}</p>
         <div class="hero-actions">
           <router-link to="/products" class="btn-primary">浏览产品</router-link>
           <router-link to="/contact" class="btn-outline">联系我们</router-link>
@@ -119,19 +130,12 @@ const testimonials = ref<{name:string;role:string;text:string}[]>([])
           <p class="section-subtitle">六大品类，满足不同空间的家具需求</p>
         </div>
         <div :ref="addReveal" class="category-grid reveal">
-          <div class="category-card" v-for="cat in [
-            { key:'living', name:'客厅系列', en:'Living Room', desc:'沙发、茶几、电视柜、边几等，打造家的核心社交空间' },
-            { key:'dining', name:'餐厅系列', en:'Dining Room', desc:'餐桌、餐椅、餐边柜、酒柜等，让每一餐都充满仪式感' },
-            { key:'bedroom', name:'卧室系列', en:'Bedroom', desc:'床、床头柜、衣柜、梳妆台等，营造舒适私密的休憩空间' },
-            { key:'study', name:'书房系列', en:'Home Office', desc:'书桌、书柜、办公椅等，在书香中享受专注时光' },
-            { key:'hotel', name:'酒店工程', en:'Hotel Project', desc:'客房整装、公区家具、宴会厅桌椅等规模化定制交付' },
-            { key:'office', name:'办公系列', en:'Workspace', desc:'高管桌、会议桌、文件柜、屏风等现代办公家具解决方案' },
-          ]" :key="cat.name">
-            <img :src="'/images/cat-' + cat.key + '.svg'" :alt="cat.name" class="cat-img" />
-            <h3>{{ cat.name }}</h3>
-            <p class="cat-en">{{ cat.en }}</p>
+          <div class="category-card" v-for="cat in homeCategories" :key="cat.key">
+            <img v-if="cat.image" :src="'http://127.0.0.1:8000' + cat.image" :alt="cat.name" class="cat-img" />
+            <img v-else :src="'/images/cat-' + cat.key + '.svg'" :alt="cat.name" class="cat-img" />
+            <h3>{{ cat.name }}系列</h3>
             <p class="cat-desc">{{ cat.desc }}</p>
-            <router-link to="/products" class="inline-link">浏览产品 →</router-link>
+            <router-link :to="'/products?cat=' + cat.key" class="inline-link">浏览产品 →</router-link>
           </div>
         </div>
       </div>

@@ -3,13 +3,13 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
+import CartPop from './CartPop.vue'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const cart = useCartStore()
 const showCartPop = ref(false)
-const showClearConfirm = ref(false)
 const mobileMenuOpen = ref(false)
 const scrolled = ref(false)
 
@@ -82,16 +82,7 @@ async function confirmLogout() {
               </div>
             </div>
             <div v-if="cart.totalItems > 0" class="cart-pop-total">合计 ¥{{ cart.totalPrice.toLocaleString() }}</div>
-            <div v-if="cart.totalItems > 0 && !showClearConfirm" class="cart-pop-actions">
-              <button class="pop-clear" @click="showClearConfirm = true">清空</button>
-              <router-link to="/shop" class="pop-checkout"
-                @click="cart.triggerCheckout(); showCartPop = false">去结算</router-link>
-            </div>
-            <div v-if="showClearConfirm" class="cart-pop-confirm">
-              <span>确定清空？</span>
-              <button class="pop-clear-yes" @click="cart.clear(); showClearConfirm = false">清空</button>
-              <button class="pop-clear-no" @click="showClearConfirm = false">取消</button>
-            </div>
+            <CartPop @checkout="showCartPop = false; cart.triggerCheckout(); $router.push('/shop')" />
           </div>
         </div>
 
@@ -447,91 +438,7 @@ async function confirmLogout() {
   justify-content: space-between;
   color: var(--gold);
   font-weight: 500;
-}
 
-.cart-pop-actions {
-  display: flex;
-  gap: 8px;
-  padding: 0 16px 14px;
-}
-
-.pop-clear {
-  flex: 1;
-  padding: 10px;
-  background: none;
-  border: 1px solid #eee;
-  color: var(--text-muted);
-  font-size: 12px;
-  letter-spacing: 1px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.3s;
-}
-
-.pop-clear:hover {
-  color: #c00;
-  border-color: #fcc;
-}
-
-.pop-checkout {
-  flex: 2;
-  padding: 10px;
-  background: var(--gold);
-  color: #fff;
-  text-align: center;
-  font-size: 13px;
-  letter-spacing: 2px;
-  display: block;
-  transition: background 0.3s;
-}
-
-.pop-checkout:hover {
-  background: #7a5c12;
-}
-
-.cart-pop-confirm {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border-top: 1px solid #eee;
-  font-size: 13px;
-  color: var(--text);
-}
-
-.cart-pop-confirm span {
-  flex: 1;
-}
-
-.pop-clear-yes {
-  padding: 6px 16px;
-  background: #c00;
-  color: #fff;
-  border: none;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background 0.3s;
-  font-family: inherit;
-}
-
-.pop-clear-yes:hover {
-  background: #a00;
-}
-
-.pop-clear-no {
-  padding: 6px 16px;
-  background: none;
-  border: 1px solid #ddd;
-  color: var(--text-muted);
-  font-size: 12px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.3s;
-}
-
-.pop-clear-no:hover {
-  border-color: #999;
-  color: #666;
 }
 
 .hamburger {

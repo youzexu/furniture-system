@@ -5,6 +5,7 @@ import { useAuthStore } from './stores/auth'
 import { API_BASE } from './api'
 import NavBar from './components/NavBar.vue'
 import AppFooter from './components/AppFooter.vue'
+import AppToast from './components/AppToast.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -45,7 +46,8 @@ function scrollToTop() {
         <span v-if="i < announcements.length - 1" class="announce-sep">｜</span>
       </span>
     </div>
-    <div v-else class="announce-bar" style="background:#fff3cd;color:#856404">测试公告：渲染正常，API未加载</div>
+
+    <AppToast ref="appToast" />
 
     <main class="page-content">
       <router-view v-slot="{ Component }">
@@ -74,16 +76,101 @@ function scrollToTop() {
 </template>
 
 <style scoped>
-.expired-overlay { position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 40px; }
-.expired-card { background: #fff; max-width: 380px; width: 100%; padding: 44px 36px; text-align: center; }
-.expired-icon { font-size: 40px; display: block; margin-bottom: 16px; }
-.expired-card h3 { font-size: 20px; font-weight: 400; color: var(--dark); letter-spacing: 4px; margin-bottom: 10px; font-family: 'Noto Serif SC', serif; }
-.expired-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
-.btn-primary { padding: 12px 32px; background: var(--gold); color: #fff; border: none; font-size: 14px; letter-spacing: 3px; cursor: pointer; font-family: inherit; transition: background 0.3s; }
-.btn-primary:hover { background: #7a5c12; }
-.announce-bar { background: #faf7f2; text-align: center; padding: 8px 20px; font-size: 13px; color: var(--gold); letter-spacing: 2px; border-bottom: 1px solid #f0e8d8; margin-top: 72px; }
-.announce-bar a { color: var(--gold); }
-.announce-sep { color: #ddd; margin: 0 8px; }
-.back-top { position: fixed; bottom: 40px; right: 40px; width: 44px; height: 44px; background: var(--dark); color: #fff; border: none; font-size: 20px; cursor: pointer; z-index: 150; display: flex; align-items: center; justify-content: center; transition: background 0.3s, opacity 0.3s; }
-.back-top:hover { background: var(--gold); }
+.expired-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.expired-card {
+  background: #fff;
+  max-width: 380px;
+  width: 100%;
+  padding: 44px 36px;
+  text-align: center;
+}
+
+.expired-icon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.expired-card h3 {
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--dark);
+  letter-spacing: 4px;
+  margin-bottom: 10px;
+  font-family: 'Noto Serif SC', serif;
+}
+
+.expired-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+.btn-primary {
+  padding: 12px 32px;
+  background: var(--gold);
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.3s;
+}
+
+.btn-primary:hover {
+  background: #7a5c12;
+}
+
+.announce-bar {
+  background: #faf7f2;
+  text-align: center;
+  padding: 8px 20px;
+  font-size: 13px;
+  color: var(--gold);
+  letter-spacing: 2px;
+  border-bottom: 1px solid #f0e8d8;
+  margin-top: 72px;
+}
+
+.announce-bar a {
+  color: var(--gold);
+}
+
+.announce-sep {
+  color: #ddd;
+  margin: 0 8px;
+}
+
+.back-top {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 44px;
+  height: 44px;
+  background: var(--dark);
+  color: #fff;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s, opacity 0.3s;
+}
+
+.back-top:hover {
+  background: var(--gold);
+}
 </style>

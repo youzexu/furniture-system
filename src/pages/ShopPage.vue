@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useReveal } from '../composables/useReveal'
 import { useCartStore } from '../stores/cart'
 import { useAuthStore } from '../stores/auth'
+import { useCheckout } from '../composables/useCheckout'
 
 const { addReveal } = useReveal()
 import { API_BASE } from '../api'
@@ -22,8 +23,6 @@ function onImgError(e: Event, code: string) {
 const cart = useCartStore()
 const auth = useAuthStore()
 const showCheckout = ref(false)
-const submitted = ref(false)
-const submitting = ref(false)
 const showLoginPrompt = ref(false)
 const showClearConfirm = ref(false)
 const toastMsg = ref('')
@@ -55,7 +54,7 @@ function confirmClear() {
 }
 
 interface Product {
-  code: string; name: string; cat: string; material: string
+  code: string; name: string; cat: string; shop_cat: string; material: string
   price: string; priceNum: number; desc: string; tag?: string; image: string
 }
 
@@ -67,7 +66,7 @@ const cats = ref<{ key: string; label: string }[]>([{ key: 'all', label: '全部
 
 async function fetchCategories() {
   try {
-    const res = await fetch(`${API_BASE}/api/categories/`)
+    const res = await fetch(`${API_BASE}/api/shop-categories/`)
     const data = await res.json()
     if (data.success) {
       cats.value = [{ key: 'all', label: '全部' }, ...data.data.map((c: any) => ({ key: c.key, label: c.name }))]
@@ -84,7 +83,7 @@ function onSearch() {
 }
 
 const filtered = computed(() => {
-  let result = activeCat.value === 'all' ? products.value : products.value.filter(p => p.cat === activeCat.value)
+  let result = activeCat.value === 'all' ? products.value : products.value.filter(p => p.shop_cat === activeCat.value)
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
     result = result.filter(p =>
@@ -108,10 +107,6 @@ async function loadProducts() {
   } catch {
     loadError.value = true
   }
-  if (products.value.length > 0) {
-    const catSet = new Set(products.value.map((p: Product) => p.cat))
-    cats.value = [{ key: 'all', label: '全部' }, ...([...catSet] as string[]).map(c => ({ key: c, label: catLabels[c] || c }))]
-  }
   loading.value = false
 }
 
@@ -127,56 +122,8 @@ watch(() => cart.pendingCheckout, (val) => {
   }
 })
 
-// 结算表单
-const step = ref(1)
-const orderForm = ref({
-  name: '', phone: '', address: '', city: '', note: ''
-})
-const fieldErrors = ref<Record<string, string>>({})
-
-function validateForm(): boolean {
-  fieldErrors.value = {}
-  if (!orderForm.value.name.trim()) fieldErrors.value.name = '请填写收货人'
-  if (!orderForm.value.phone.trim()) fieldErrors.value.phone = '请填写联系电话'
-  if (!orderForm.value.city.trim()) fieldErrors.value.city = '请填写城市'
-  if (!orderForm.value.address.trim()) fieldErrors.value.address = '请填写详细地址'
-  return Object.keys(fieldErrors.value).length === 0
-}
-
-function nextStep() {
-  if (step.value === 1) { step.value = 2; return }
-  if (step.value === 2 && validateForm()) { submitOrder() }
-}
-
-async function submitOrder() {
-  if (!validateForm()) return
-  submitting.value = true
-  try {
-    const res = await auth.authFetch(`${API_BASE}/api/order/submit/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contact_person: orderForm.value.name,
-        phone: orderForm.value.phone,
-        address: orderForm.value.city + ' ' + orderForm.value.address,
-        note: orderForm.value.note,
-        items: cart.items.map(i => ({ code: i.code, name: i.name, quantity: i.quantity, price: i.priceNum })),
-        total: cart.totalPrice,
-      }),
-    })
-    const data = await res.json()
-    if (data.success) {
-      submitted.value = true
-      step.value = 3
-      cart.clear()
-    } else {
-      fieldErrors.value._global = data.message || '提交失败'
-    }
-  } catch {
-    fieldErrors.value._global = '网络错误，请稍后重试'
-  }
-  submitting.value = false
-}
+// 结算逻辑
+const { step, submitting, submitted, orderForm, fieldErrors, nextStep } = useCheckout()
 </script>
 
 <template>
@@ -225,7 +172,8 @@ async function submitOrder() {
           </div>
           <div class="product-card" v-for="p in filtered" :key="p.code" @click="selectedProduct = p">
             <div class="product-img">
-              <img :src="productImageSrc(p)" :alt="p.name" class="product-image" loading="lazy" @error="e => onImgError(e, p.code)" />
+              <img :src="productImageSrc(p)" :alt="p.name" class="product-image" loading="lazy"
+                @error="e => onImgError(e, p.code)" />
               <span v-if="p.tag" class="product-tag">{{ p.tag }}</span>
             </div>
             <div class="product-body">
@@ -234,8 +182,7 @@ async function submitOrder() {
               <p class="product-desc">{{ p.desc }}</p>
               <div class="product-footer">
                 <span class="price">{{ p.price }}</span>
-                <button class="add-btn"
-                  @click.stop="addToCart(p)">加入购物车</button>
+                <button class="add-btn" @click.stop="addToCart(p)">加入购物车</button>
               </div>
             </div>
           </div>
@@ -248,8 +195,8 @@ async function submitOrder() {
               <button class="detail-close" @click="selectedProduct = null">✕</button>
               <div class="detail-grid">
                 <div class="detail-image">
-                  <img :src="productImageSrc(selectedProduct!)" :alt="selectedProduct!.name" class="detail-img" loading="lazy"
-                    @error="e => onImgError(e, selectedProduct!.code)" />
+                  <img :src="productImageSrc(selectedProduct!)" :alt="selectedProduct!.name" class="detail-img"
+                    loading="lazy" @error="e => onImgError(e, selectedProduct!.code)" />
                 </div>
                 <div class="detail-info">
                   <p class="detail-code">{{ selectedProduct.code }}</p>
@@ -258,12 +205,11 @@ async function submitOrder() {
                   <div class="detail-table">
                     <div class="d-row"><span>材质</span><span>{{ selectedProduct.material }}</span></div>
                     <div class="d-row"><span>分类</span><span>{{ catLabels[selectedProduct.cat] || selectedProduct.cat
-                        }}</span></div>
+                    }}</span></div>
                     <div class="d-row"><span>价格</span><span class="gold">{{ selectedProduct.price }}</span></div>
                   </div>
                   <div class="detail-actions">
-                    <button class="btn-primary"
-                      @click="addToCart(selectedProduct!); selectedProduct = null">
+                    <button class="btn-primary" @click="addToCart(selectedProduct!); selectedProduct = null">
                       加入购物车
                     </button>
                     <button class="btn-outline-dark" @click="selectedProduct = null">继续浏览</button>
@@ -399,7 +345,7 @@ async function submitOrder() {
             <p class="success-desc">感谢您的订购！我们的客服将在 <strong>24 小时内</strong>与您联系确认订单详情。</p>
             <div class="success-info">
               <div class="si-row"><span>订单编号</span><strong>#{{ submitted ? 'SP' + Date.now().toString(36).toUpperCase()
-                  : '' }}</strong></div>
+                : '' }}</strong></div>
               <div class="si-row"><span>应付金额</span><strong>¥{{ cart.totalPrice.toLocaleString() }}</strong></div>
             </div>
             <button class="btn-primary" @click="submitted = false; showCheckout = false; step = 1">继续购物</button>
@@ -558,24 +504,86 @@ async function submitOrder() {
 .product-card {
   animation: cardIn .5s ease both;
 }
-.product-card:nth-child(1) { animation-delay: .05s; }
-.product-card:nth-child(2) { animation-delay: .1s; }
-.product-card:nth-child(3) { animation-delay: .15s; }
-.product-card:nth-child(4) { animation-delay: .2s; }
-.product-card:nth-child(5) { animation-delay: .25s; }
-.product-card:nth-child(6) { animation-delay: .3s; }
-.product-card:nth-child(7) { animation-delay: .35s; }
-.product-card:nth-child(8) { animation-delay: .4s; }
-.product-card:nth-child(9) { animation-delay: .45s; }
-.product-card:nth-child(10) { animation-delay: .5s; }
-.product-card:nth-child(11) { animation-delay: .55s; }
-.product-card:nth-child(12) { animation-delay: .6s; }
-.product-card:nth-child(13) { animation-delay: .65s; }
-.product-card:nth-child(14) { animation-delay: .7s; }
-.product-card:nth-child(15) { animation-delay: .75s; }
-.product-card:nth-child(16) { animation-delay: .8s; }
-@keyframes cardIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-.product-card:hover { background: #fafaf8; }
+
+.product-card:nth-child(1) {
+  animation-delay: .05s;
+}
+
+.product-card:nth-child(2) {
+  animation-delay: .1s;
+}
+
+.product-card:nth-child(3) {
+  animation-delay: .15s;
+}
+
+.product-card:nth-child(4) {
+  animation-delay: .2s;
+}
+
+.product-card:nth-child(5) {
+  animation-delay: .25s;
+}
+
+.product-card:nth-child(6) {
+  animation-delay: .3s;
+}
+
+.product-card:nth-child(7) {
+  animation-delay: .35s;
+}
+
+.product-card:nth-child(8) {
+  animation-delay: .4s;
+}
+
+.product-card:nth-child(9) {
+  animation-delay: .45s;
+}
+
+.product-card:nth-child(10) {
+  animation-delay: .5s;
+}
+
+.product-card:nth-child(11) {
+  animation-delay: .55s;
+}
+
+.product-card:nth-child(12) {
+  animation-delay: .6s;
+}
+
+.product-card:nth-child(13) {
+  animation-delay: .65s;
+}
+
+.product-card:nth-child(14) {
+  animation-delay: .7s;
+}
+
+.product-card:nth-child(15) {
+  animation-delay: .75s;
+}
+
+.product-card:nth-child(16) {
+  animation-delay: .8s;
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.product-card:hover {
+  background: #fafaf8;
+}
 
 .product-img {
   aspect-ratio: 3/2;
@@ -1529,15 +1537,98 @@ async function submitOrder() {
 .prompt-close:hover {
   color: #666;
 }
-.checkout-bar { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #eee; padding: 16px 40px; z-index: 50; }
-.checkout-bar-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: flex-end; gap: 24px; }
-.cb-total { font-size: 18px; color: var(--gold); }
-.cb-btn { padding: 12px 40px; background: var(--gold); color: #fff; border: none; font-size: 14px; letter-spacing: 3px; cursor: pointer; font-family: inherit; transition: background 0.3s; }
-.cb-btn:hover { background: #7a5c12; }
-.toast { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 12px 28px; font-size: 13px; letter-spacing: 3px; z-index: 300; animation: toastIn .3s ease; }
-@keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(-10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
-.search-bar { max-width: 360px; margin: 16px auto 0; }
-.search-bar input { width: 100%; padding: 10px 16px; border: none; border-bottom: 1px solid #ddd; font-size: 14px; color: var(--text); outline: none; background: transparent; text-align: center; letter-spacing: 1px; font-family: inherit; transition: border-color 0.3s; }
-.search-bar input:focus { border-bottom-color: var(--gold); }
-.search-bar input::placeholder { color: #ccc; letter-spacing: 2px; }
+
+.checkout-bar {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  border-top: 1px solid #eee;
+  padding: 16px 40px;
+  z-index: 50;
+}
+
+.checkout-bar-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 24px;
+}
+
+.cb-total {
+  font-size: 18px;
+  color: var(--gold);
+}
+
+.cb-btn {
+  padding: 12px 40px;
+  background: var(--gold);
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.3s;
+}
+
+.cb-btn:hover {
+  background: #7a5c12;
+}
+
+.toast {
+  position: fixed;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dark);
+  color: #fff;
+  padding: 12px 28px;
+  font-size: 13px;
+  letter-spacing: 3px;
+  z-index: 300;
+  animation: toastIn .3s ease;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.search-bar {
+  max-width: 360px;
+  margin: 16px auto 0;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  background: transparent;
+  text-align: center;
+  letter-spacing: 1px;
+  font-family: inherit;
+  transition: border-color 0.3s;
+}
+
+.search-bar input:focus {
+  border-bottom-color: var(--gold);
+}
+
+.search-bar input::placeholder {
+  color: #ccc;
+  letter-spacing: 2px;
+}
 </style>
