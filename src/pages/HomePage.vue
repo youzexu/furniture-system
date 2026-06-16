@@ -2,8 +2,10 @@
 import { onMounted, ref } from 'vue'
 import { API_BASE } from '../api'
 import { useReveal } from '../composables/useReveal'
+import { useSiteStore } from '../stores/site'
 
 const { addReveal } = useReveal()
+const siteStore = useSiteStore()
 const visible = ref(false)
 const heroTitle = ref('以工艺之名\n定义家居美学')
 const heroSub = ref('二十三年专注高端家具制造\n从原木到成品，每一件都是对品质的承诺')
@@ -14,13 +16,13 @@ const homeCategories = ref<{key:string;name:string;desc:string;image:string}[]>(
 
 onMounted(() => {
   setTimeout(() => visible.value = true, 100)
-  fetch(`${API_BASE}/api/categories/`).then(r => r.json()).then(d => {
-    if (d.success) homeCategories.value = d.data
-  }).catch(() => {})
-  // Fetch site config for hero text
-  fetch(`${API_BASE}/api/site-config/`).then(r => r.json()).then(d => {
-    if (d.success) { heroTitle.value = d.data.hero_title; heroSub.value = d.data.hero_sub }
-  }).catch(() => {})
+  siteStore.fetchCategories().then(() => { homeCategories.value = siteStore.categories })
+  siteStore.fetchSiteConfig().then(() => {
+    if (siteStore.siteConfig) {
+      heroTitle.value = siteStore.siteConfig.hero_title
+      heroSub.value = siteStore.siteConfig.hero_sub
+    }
+  })
   fetch(`${API_BASE}/api/partners/`).then(r => r.json()).then(d => { if (d.success) partners.value = d.data }).catch(() => {})
   fetch(`${API_BASE}/api/banners/`).then(r => r.json()).then(d => {
     if (d.success && d.data.length > 0) {
@@ -64,7 +66,7 @@ const testimonials = ref<{name:string;role:string;text:string}[]>([])
         </div>
       </div>
       <div class="hero-right">
-        <img :src="'http://127.0.0.1:8000' + banners[bannerIndex].image" alt="" class="hero-carousel-img" />
+        <img :src="API_BASE + banners[bannerIndex].image" :alt="banners[bannerIndex].title" class="hero-carousel-img" />
         <div v-if="banners.length > 1" class="hero-carousel-dots">
           <span v-for="(_b, i) in banners" :key="i" :class="{active: i===bannerIndex}" @click="bannerIndex=i"></span>
         </div>
@@ -112,7 +114,7 @@ const testimonials = ref<{name:string;role:string;text:string}[]>([])
         </div>
         <div :ref="addReveal" class="category-grid reveal">
           <div class="category-card" v-for="cat in homeCategories" :key="cat.key">
-            <img v-if="cat.image" :src="'http://127.0.0.1:8000' + cat.image" :alt="cat.name" class="cat-img" />
+            <img v-if="cat.image" :src="API_BASE + cat.image" :alt="cat.name" class="cat-img" />
             <img v-else :src="'/images/cat-' + cat.key + '.svg'" :alt="cat.name" class="cat-img" />
             <h3>{{ cat.name }}系列</h3>
             <p class="cat-desc">{{ cat.desc }}</p>

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { API_BASE } from '../api'
 import { request } from '../utils/request'
+import { useCartStore } from './cart'
 
 interface User {
   id: number
@@ -79,6 +80,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     clear()
+    try { useCartStore().clear() } catch {}
   }
 
   async function updateProfile(first_name: string, email: string) {

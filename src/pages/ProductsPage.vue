@@ -3,6 +3,7 @@ import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useReveal } from '../composables/useReveal'
 import { API_BASE } from '../api'
+import { request } from '../utils/request'
 
 const { addReveal } = useReveal()
 const visible = ref(false)
@@ -38,7 +39,7 @@ const categories = ref<{ key: string; label: string }[]>([{ key: 'all', label: '
 
 async function fetchCategories() {
   try {
-    const res = await fetch(`${API_BASE}/api/categories/`)
+    const res = await request(`${API_BASE}/api/categories/`)
     const data = await res.json()
     if (data.success) {
       categories.value = [{ key: 'all', label: '全部产品' }, ...data.data.map((c: any) => ({ key: c.key, label: c.name + '系列' }))]
@@ -60,13 +61,11 @@ async function loadProducts(search?: string) {
     if (search) params.set('search', search)
     const qs = params.toString()
     if (qs) url += '?' + qs
-    const res = await fetch(url)
+    const res = await request(url)
     const data = await res.json()
     if (data.success) products.value = data.data
   } catch {}
 }
-
-onMounted(loadProducts)
 
 const filtered = computed(() => activeCat.value === 'all' ? products.value : products.value.filter(p => p.cat === activeCat.value))
 </script>
@@ -210,4 +209,13 @@ const filtered = computed(() => activeCat.value === 'all' ? products.value : pro
 .recent-del { background: none; border: none; color: #ccc; font-size: 14px; cursor: pointer; padding: 0 0 0 8px; transition: color .3s; }
 .recent-del:hover { color: #c00; }
 .recent-name { font-size: 13px; color: var(--text); letter-spacing: 1px; }
+
+@media (max-width: 768px) {
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .filter-bar { flex-wrap: wrap; }
+  .filter-bar button { padding: 10px 18px; font-size: 12px; }
+}
+@media (max-width: 480px) {
+  .product-grid { grid-template-columns: 1fr; }
+}
 </style>

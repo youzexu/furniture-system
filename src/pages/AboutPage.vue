@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useReveal } from '../composables/useReveal'
+
+const { addReveal } = useReveal()
 const visible = ref(false)
 onMounted(() => setTimeout(() => visible.value = true, 100))
 
@@ -18,7 +21,7 @@ const milestones = [
       <div><p class="banner-label">ABOUT US</p><h1>关于我们</h1><p class="banner-sub">二十三载匠心传承 · 以品质定义家居美学</p></div>
     </section>
 
-    <section class="section">
+    <section class="section reveal" :ref="addReveal">
       <div class="container">
         <div class="about-intro">
           <p class="lead">尚品工坊成立于 2001 年，坐落于中国家具之都——广东佛山。二十三年来，我们始终专注高端家具制造，致力于为全球客户提供兼具美学价值与实用功能的家具产品。</p>
@@ -28,7 +31,7 @@ const milestones = [
       </div>
     </section>
 
-    <section class="section bg-light">
+    <section class="section bg-light reveal" :ref="addReveal">
       <div class="container">
         <div class="text-center"><p class="section-label">MILESTONE</p><h2 class="section-title">发展历程</h2></div>
         <div class="timeline">
@@ -40,7 +43,7 @@ const milestones = [
       </div>
     </section>
 
-    <section class="section">
+    <section class="section reveal" :ref="addReveal">
       <div class="container">
         <div class="text-center"><p class="section-label">CULTURE</p><h2 class="section-title">企业文化</h2></div>
         <div class="culture-grid">
@@ -88,4 +91,10 @@ const milestones = [
 .culture-card { background:#fff; padding:50px 30px; text-align:center; }
 .culture-card h3 { font-size:18px; color:var(--dark); letter-spacing:3px; margin-bottom:14px; }
 .culture-card p { font-size:14px; color:var(--text-light); line-height:1.8; }
+
+@media (max-width: 768px) {
+  .culture-grid { grid-template-columns: 1fr; }
+  .tl-item { flex-direction: column; gap: 12px; }
+  .page-banner h1 { font-size: 28px; }
+}
 </style>

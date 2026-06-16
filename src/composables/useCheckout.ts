@@ -1,8 +1,8 @@
 import { ref, reactive } from 'vue'
 import { useCartStore } from '../stores/cart'
 import { useAuthStore } from '../stores/auth'
-
-const API_BASE = 'http://127.0.0.1:8000'
+import { API_BASE } from '../api'
+import { request } from '../utils/request'
 
 export function useCheckout() {
   const cart = useCartStore()

@@ -33,11 +33,11 @@ onMounted(async () => {
         </div>
         <div class="footer-col">
           <h4>产品系列</h4>
-          <span>客厅家具</span>
-          <span>餐厅家具</span>
-          <span>卧室家具</span>
-          <span>办公家具</span>
-          <span>酒店工程</span>
+          <router-link to="/products?cat=living">客厅家具</router-link>
+          <router-link to="/products?cat=dining">餐厅家具</router-link>
+          <router-link to="/products?cat=bedroom">卧室家具</router-link>
+          <router-link to="/products?cat=office">办公家具</router-link>
+          <router-link to="/products?cat=hotel">酒店工程</router-link>
         </div>
         <div class="footer-col">
           <h4>联系方式</h4>

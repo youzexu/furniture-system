@@ -81,4 +81,10 @@ const router = useRouter()
   transition: all 0.3s;
 }
 .btn-outline:hover { background: var(--gold, #8b6914); color: #fff; }
+
+@media (max-width: 480px) {
+  .nf-code { font-size: 80px; }
+  .nf-content h1 { font-size: 20px; }
+  .nf-actions { flex-direction: column; align-items: center; }
+}
 </style>

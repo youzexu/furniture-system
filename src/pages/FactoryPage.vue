@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { API_BASE } from '../api'
+import { useReveal } from '../composables/useReveal'
 
+const { addReveal } = useReveal()
 const visible = ref(false)
 const processes = ref<{step:string;title:string;desc:string}[]>([])
 const workshops = ref<{name:string;area:string;workers:number;equip:string}[]>([])
 const certs = ref<string[]>([])
-import { API_BASE } from '../api'
 
 onMounted(() => {
   setTimeout(() => visible.value = true, 100)
@@ -21,7 +23,7 @@ onMounted(() => {
       <div><p class="banner-label">FACTORY</p><h1>智造基地</h1><p class="banner-sub">30,000㎡ 现代化工厂 · 德国精工生产线 · 200+ 匠人团队</p></div>
     </section>
 
-    <section class="section">
+    <section class="section reveal" :ref="addReveal">
       <div class="container">
         <div class="overview-grid">
           <div class="overview-image"><div class="img-placeholder dark large"><div class="img-text">工厂航拍全景 · 佛山顺德</div></div></div>
@@ -35,7 +37,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <section class="section bg-light">
+    <section class="section bg-light reveal" :ref="addReveal">
       <div class="container">
         <div class="text-center"><p class="section-label">WORKSHOP</p><h2 class="section-title">六大核心车间</h2></div>
         <div class="workshop-grid">
@@ -47,7 +49,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <section class="section">
+    <section class="section reveal" :ref="addReveal">
       <div class="container">
         <div class="text-center"><p class="section-label">CRAFT</p><h2 class="section-title">六步匠心工艺</h2></div>
         <div class="process-list">
@@ -59,7 +61,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <section class="section bg-light">
+    <section class="section bg-light reveal" :ref="addReveal">
       <div class="container">
         <div class="text-center"><p class="section-label">CAPACITY</p><h2 class="section-title">生产实力</h2></div>
         <div class="capacity-grid">
@@ -73,7 +75,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <section class="section">
+    <section class="section reveal" :ref="addReveal">
       <div class="container">
         <div class="text-center"><p class="section-label">CERTIFICATIONS</p><h2 class="section-title">资质与认证</h2></div>
         <div class="cert-grid"><div class="cert-item" v-for="c in certs" :key="c">{{ c }}</div></div>

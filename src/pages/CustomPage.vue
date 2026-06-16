@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useReveal } from '../composables/useReveal'
+import { API_BASE } from '../api'
 
 const { addReveal } = useReveal()
 const visible = ref(false)
 const cases = ref<{name:string;type:string;area:string;style:string;desc:string}[]>([])
-import { API_BASE } from '../api'
 
 async function loadCases() {
   try {
@@ -15,8 +15,11 @@ async function loadCases() {
   } catch {}
 }
 
-onMounted(() => { setTimeout(() => visible.value = true, 100); loadCases() })
-fetch(`${API_BASE}/api/faqs/`).then(r=>r.json()).then(d=>{ if(d.success) faq.value = d.data }).catch(()=>{})
+onMounted(() => {
+  setTimeout(() => visible.value = true, 100)
+  loadCases()
+  fetch(`${API_BASE}/api/faqs/`).then(r => r.json()).then(d => { if (d.success) faq.value = d.data }).catch(() => {})
+})
 
 const flowSteps = [
   { icon:'💬', title:'需求沟通', desc:'专业顾问一对一沟通，深入了解您的设计偏好、空间尺寸、功能需求、预算范围与使用场景。预约后可安排设计师上门测量。' },

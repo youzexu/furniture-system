@@ -61,6 +61,10 @@ async function handleSubmit() {
     return
   }
   if (!form.name || !form.phone) return
+  if (!/^1[3-9]\d{9}$/.test(form.phone.trim())) {
+    errorMsg.value = '请输入正确的手机号码'
+    return
+  }
   submitting.value = true
   errorMsg.value = ''
 
@@ -122,25 +126,25 @@ async function handleSubmit() {
             <div class="info-section">
               <h4>公司总部</h4>
               <div class="info-row">
-                <img src="/contact/dizhi.svg" alt="" class="info-icon" />
+                <img src="/contact/dizhi.svg" alt="地址" class="info-icon" />
                 <span>广东省佛山市顺德区龙江镇工业大道 188 号</span>
               </div>
               <div class="info-row">
-                <img src="/contact/dianhua.svg" alt="" class="info-icon" />
+                <img src="/contact/dianhua.svg" alt="电话" class="info-icon" />
                 <div>
                   <p>400-888-6688（全国服务热线）</p>
                   <p>+86-757-2388-6688（国际贸易部）</p>
                 </div>
               </div>
               <div class="info-row">
-                <img src="/contact/youjian.svg" alt="" class="info-icon" />
+                <img src="/contact/youjian.svg" alt="邮箱" class="info-icon" />
                 <div>
                   <p>info@shangpin.com（业务咨询）</p>
                   <p>hr@shangpin.com（人才招聘）</p>
                 </div>
               </div>
               <div class="info-row">
-                <img src="/contact/zhongbiao.svg" alt="" class="info-icon" />
+                <img src="/contact/zhongbiao.svg" alt="营业时间" class="info-icon" />
                 <div>
                   <p>周一至周六 8:00 - 18:00</p>
                   <p>周日及法定节假日休息</p>
@@ -151,7 +155,7 @@ async function handleSubmit() {
             <div class="info-section">
               <h4>展厅地址</h4>
               <div class="info-row">
-                <img src="/contact/loufang.svg" alt="" class="info-icon" />
+                <img src="/contact/loufang.svg" alt="展厅" class="info-icon" />
                 <div>
                   <p>罗浮宫国际家具博览中心 3 楼 C15-C18</p>
                   <p>深圳国际艺展中心 MALL 2 楼 B23</p>
@@ -247,7 +251,7 @@ async function handleSubmit() {
     <section class="map-section">
       <div class="map-placeholder">
         <div>
-          <img src="/contact/dizhi.svg" alt="" class="map-icon" />
+          <img src="/contact/dizhi.svg" alt="地址" class="map-icon" />
           <p>广东省佛山市顺德区龙江镇工业大道 188 号</p>
           <p class="map-sub">广佛江珠高速龙江出口 5 分钟车程 | 广州白云机场 60 分钟车程</p>
         </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, onErrorCaptured } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import { API_BASE } from './api'
@@ -12,6 +12,12 @@ const router = useRouter()
 const showBackTop = ref(false)
 const announcements = ref<{ text: string; link: string }[]>([])
 const showAnnounce = ref(false)
+const routeError = ref(false)
+
+onErrorCaptured((err) => {
+  routeError.value = true
+  return false
+})
 
 function onScroll() {
   showBackTop.value = window.scrollY > 400
@@ -50,11 +56,21 @@ function scrollToTop() {
     <AppToast ref="appToast" />
 
     <main class="page-content">
-      <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
+      <div v-if="routeError" class="route-error">
+        <span>⚠️</span>
+        <p>页面加载失败</p>
+        <button class="btn-primary" @click="routeError = false; $router.go(0)">刷新页面</button>
+      </div>
+      <Suspense v-else>
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+        <template #fallback>
+          <div class="route-loading"><span>⏳</span><p>加载中...</p></div>
+        </template>
+      </Suspense>
     </main>
     <AppFooter />
 
@@ -172,5 +188,22 @@ function scrollToTop() {
 
 .back-top:hover {
   background: var(--gold);
+}
+
+.route-error, .route-loading {
+  text-align: center;
+  padding: 120px 20px;
+  color: var(--text-muted);
+}
+
+.route-error span, .route-loading span {
+  font-size: 44px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.route-error p, .route-loading p {
+  font-size: 14px;
+  margin-bottom: 20px;
 }
 </style>

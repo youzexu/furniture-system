@@ -4,9 +4,10 @@ import { useReveal } from '../composables/useReveal'
 import { useCartStore } from '../stores/cart'
 import { useAuthStore } from '../stores/auth'
 import { useCheckout } from '../composables/useCheckout'
+import { API_BASE } from '../api'
+import { request } from '../utils/request'
 
 const { addReveal } = useReveal()
-import { API_BASE } from '../api'
 
 function productImageSrc(p: { image?: string; code: string }): string {
   return p.image ? API_BASE + p.image : '/images/shop/' + p.code + '.svg'
@@ -66,7 +67,7 @@ const cats = ref<{ key: string; label: string }[]>([{ key: 'all', label: '全部
 
 async function fetchCategories() {
   try {
-    const res = await fetch(`${API_BASE}/api/shop-categories/`)
+    const res = await request(`${API_BASE}/api/shop-categories/`)
     const data = await res.json()
     if (data.success) {
       cats.value = [{ key: 'all', label: '全部' }, ...data.data.map((c: any) => ({ key: c.key, label: c.name }))]
@@ -75,12 +76,6 @@ async function fetchCategories() {
 }
 const activeCat = ref('all')
 const searchQuery = ref('')
-let debounceTimer: ReturnType<typeof setTimeout>
-
-function onSearch() {
-  clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => {}, 600)
-}
 
 const filtered = computed(() => {
   let result = activeCat.value === 'all' ? products.value : products.value.filter(p => p.shop_cat === activeCat.value)
@@ -98,7 +93,7 @@ async function loadProducts() {
   loading.value = true
   loadError.value = false
   try {
-    const res = await fetch(`${API_BASE}/api/products/`)
+    const res = await request(`${API_BASE}/api/products/`)
     if (!res.ok) throw new Error('HTTP ' + res.status)
     const data = await res.json()
     if (data.success && data.data?.length > 0) {
@@ -148,7 +143,7 @@ const { step, submitting, submitted, orderForm, fieldErrors, nextStep } = useChe
         </div>
 
         <div class="search-bar">
-          <input v-model="searchQuery" type="text" placeholder="搜索产品..." @input="onSearch" />
+          <input v-model="searchQuery" type="text" placeholder="搜索产品..." />
         </div>
 
         <!-- 加载中 -->
