@@ -10,6 +10,7 @@ const orders = ref<Order[]>([])
 const loading = ref(true)
 const showConfirm = ref(false)
 const deletingId = ref<number | null>(null)
+const expandedId = ref<number | null>(null)
 
 async function deleteOrder(id: number) {
   deletingId.value = id
@@ -51,11 +52,12 @@ onMounted(async () => {
         <div v-else-if="orders.length === 0" class="state-box"><span>📭</span><p>暂无订单</p><router-link to="/shop" class="btn-primary">去购买</router-link></div>
         <div v-else class="order-list">
           <div class="order-card" v-for="o in orders" :key="o.id">
-            <div class="order-header">
+            <div class="order-header" @click="expandedId = expandedId === o.id ? null : o.id" style="cursor:pointer">
               <span class="order-id">订单 #{{ o.id }}</span>
               <span class="order-status">{{ o.status }}</span>
+              <span class="expand-arrow">{{ expandedId === o.id ? '▾' : '▸' }}</span>
             </div>
-            <div class="order-items">
+            <div v-show="expandedId === o.id" class="order-items">
               <div class="order-item" v-for="(item, i) in o.items" :key="i">
                 <span>{{ item.name }}</span>
                 <span>×{{ item.quantity }}</span>

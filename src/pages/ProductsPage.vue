@@ -20,6 +20,7 @@ onMounted(() => {
 
 const activeCat = ref('all')
 const searchQuery = ref('')
+const sortBy = ref('default')  // default | price-asc | price-desc | name
 
 function removeRecent(code: string) { recentStore.removeItem(code) }
 
@@ -61,7 +62,13 @@ async function loadProducts(search?: string) {
   } catch {}
 }
 
-const filtered = computed(() => activeCat.value === 'all' ? products.value : products.value.filter(p => p.cat === activeCat.value))
+const filtered = computed(() => {
+  let result = activeCat.value === 'all' ? products.value : products.value.filter(p => p.cat === activeCat.value)
+  if (sortBy.value === 'price-asc') result = [...result].sort((a, b) => (a.priceNum || 0) - (b.priceNum || 0))
+  if (sortBy.value === 'price-desc') result = [...result].sort((a, b) => (b.priceNum || 0) - (a.priceNum || 0))
+  if (sortBy.value === 'name') result = [...result].sort((a, b) => a.name.localeCompare(b.name, 'zh'))
+  return result
+})
 </script>
 
 <template>
@@ -87,6 +94,12 @@ const filtered = computed(() => activeCat.value === 'all' ? products.value : pro
         </div>
         <div class="search-bar">
           <input v-model="searchQuery" type="text" placeholder="搜索产品..." @input="onSearch" />
+          <select v-model="sortBy" class="sort-select">
+            <option value="default">默认排序</option>
+            <option value="price-asc">价格从低到高</option>
+            <option value="price-desc">价格从高到低</option>
+            <option value="name">按名称排序</option>
+          </select>
         </div>
       </div>
     </section>
@@ -160,10 +173,14 @@ const filtered = computed(() => activeCat.value === 'all' ? products.value : pro
   background: var(--gold);
   color: #fff;
 }
-.search-bar { max-width: 360px; margin: 16px auto 0; }
-.search-bar input { width: 100%; padding: 10px 16px; border: none; border-bottom: 1px solid #ddd; font-size: 14px; color: var(--text); outline: none; background: transparent; text-align: center; letter-spacing: 1px; font-family: inherit; transition: border-color 0.3s; }
+.search-bar { max-width: 560px; margin: 16px auto 0; display: flex; gap: 10px; align-items: center; }
+.search-bar input { flex: 1; padding: 10px 16px; border: none; border-bottom: 1px solid #ddd; font-size: 14px; color: var(--text); outline: none; background: transparent; text-align: center; letter-spacing: 1px; font-family: inherit; transition: border-color 0.3s; }
 .search-bar input:focus { border-bottom-color: var(--gold); }
 .search-bar input::placeholder { color: #ccc; letter-spacing: 2px; }
+.sort-select {
+  padding: 8px 12px; border: 1px solid #ddd; font-size: 12px; color: var(--text);
+  outline: none; background: #fff; letter-spacing: 1px; font-family: inherit; cursor: pointer; white-space: nowrap;
+}
 
 .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #eee; }
 .product-card { background: #fff; cursor: pointer; transition: background 0.3s; overflow: hidden; }

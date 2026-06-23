@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { API_BASE } from '../api'
 
 const auth = useAuthStore()
 const editing = ref(false)
@@ -37,6 +38,34 @@ async function saveProfile() {
     error.value = e.message || '保存失败'
   }
   saving.value = false
+}
+
+const changingPwd = ref(false)
+const pwdForm = reactive({ oldPassword: '', newPassword: '', confirm: '' })
+const pwdError = ref('')
+const pwdSuccess = ref('')
+const pwdSaving = ref(false)
+
+async function changePassword() {
+  pwdError.value = ''
+  pwdSuccess.value = ''
+  if (!pwdForm.oldPassword || !pwdForm.newPassword) { pwdError.value = '请填写所有密码字段'; return }
+  if (pwdForm.newPassword !== pwdForm.confirm) { pwdError.value = '两次输入不一致'; return }
+  if (pwdForm.newPassword.length < 6) { pwdError.value = '新密码至少6位'; return }
+  pwdSaving.value = true
+  try {
+    await auth.authFetch(`${API_BASE}/api/auth/change-password/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ old_password: pwdForm.oldPassword, new_password: pwdForm.newPassword })
+    })
+    pwdSuccess.value = '密码修改成功'
+    pwdForm.oldPassword = pwdForm.newPassword = pwdForm.confirm = ''
+    changingPwd.value = false
+  } catch {
+    pwdError.value = '密码修改失败，请验证原密码'
+  }
+  pwdSaving.value = false
 }
 </script>
 
@@ -104,6 +133,33 @@ async function saveProfile() {
                 <span v-if="saving" class="spinner"></span>{{ saving ? '保存中' : '保存' }}
               </button>
               <button class="btn-cancel" @click="cancelEdit">取消</button>
+            </div>
+          </div>
+
+          <!-- 修改密码 -->
+          <div v-if="!changingPwd" class="info-cards" style="margin-top:24px">
+            <button class="edit-btn" @click="changingPwd = true">修改密码</button>
+          </div>
+          <div v-else class="edit-form">
+            <div class="form-group">
+              <label>原密码</label>
+              <input v-model="pwdForm.oldPassword" type="password" placeholder="输入原密码" />
+            </div>
+            <div class="form-group">
+              <label>新密码</label>
+              <input v-model="pwdForm.newPassword" type="password" placeholder="至少6位" />
+            </div>
+            <div class="form-group">
+              <label>确认新密码</label>
+              <input v-model="pwdForm.confirm" type="password" placeholder="再次输入新密码" />
+            </div>
+            <p v-if="pwdError" class="form-error">{{ pwdError }}</p>
+            <p v-if="pwdSuccess" class="form-success">{{ pwdSuccess }}</p>
+            <div class="form-actions">
+              <button class="btn-primary" @click="changePassword" :disabled="pwdSaving">
+                {{ pwdSaving ? '提交中' : '修改密码' }}
+              </button>
+              <button class="btn-cancel" @click="changingPwd = false; pwdError = ''; pwdSuccess = ''">取消</button>
             </div>
           </div>
         </div>

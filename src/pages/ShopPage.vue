@@ -72,6 +72,7 @@ async function fetchCategories() {
 }
 const activeCat = ref('all')
 const searchQuery = ref('')
+const sortBy = ref('default')
 
 const filtered = computed(() => {
   let result = activeCat.value === 'all' ? products.value : products.value.filter(p => p.shop_cat === activeCat.value)
@@ -81,6 +82,9 @@ const filtered = computed(() => {
       p.name.includes(q) || p.material.includes(q) || p.desc.includes(q) || p.code.toLowerCase().includes(q)
     )
   }
+  if (sortBy.value === 'price-asc') result = [...result].sort((a, b) => (a.priceNum || 0) - (b.priceNum || 0))
+  if (sortBy.value === 'price-desc') result = [...result].sort((a, b) => (b.priceNum || 0) - (a.priceNum || 0))
+  if (sortBy.value === 'name') result = [...result].sort((a, b) => a.name.localeCompare(b.name, 'zh'))
   return result
 })
 const selectedProduct = ref<Product | null>(null)
@@ -143,6 +147,12 @@ const { step, submitting, submitted, orderForm, fieldErrors, nextStep } = useChe
 
         <div class="search-bar">
           <input v-model="searchQuery" type="text" placeholder="搜索产品..." />
+          <select v-model="sortBy" class="sort-select">
+            <option value="default">默认排序</option>
+            <option value="price-asc">价格从低到高</option>
+            <option value="price-desc">价格从高到低</option>
+            <option value="name">按名称排序</option>
+          </select>
         </div>
 
         <!-- 加载中 -->
@@ -1598,12 +1608,15 @@ const { step, submitting, submitted, orderForm, fieldErrors, nextStep } = useChe
 }
 
 .search-bar {
-  max-width: 360px;
+  max-width: 560px;
   margin: 16px auto 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .search-bar input {
-  width: 100%;
+  flex: 1;
   padding: 10px 16px;
   border: none;
   border-bottom: 1px solid #ddd;
@@ -1624,5 +1637,10 @@ const { step, submitting, submitted, orderForm, fieldErrors, nextStep } = useChe
 .search-bar input::placeholder {
   color: #ccc;
   letter-spacing: 2px;
+}
+
+.sort-select {
+  padding: 8px 12px; border: 1px solid #ddd; font-size: 12px; color: var(--text);
+  outline: none; background: #fff; letter-spacing: 1px; font-family: inherit; cursor: pointer; white-space: nowrap;
 }
 </style>
