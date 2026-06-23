@@ -70,7 +70,7 @@ async function handleRegister() {
     await auth.register(username.value.trim(), password.value, first_name.value.trim(), email.value.trim())
     loading.value = false
     router.push('/')
-  } catch (e: any) {
+  } catch (e: unknown) {
     loading.value = false
     error.value = e.message || '注册失败'
   }

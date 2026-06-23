@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useReveal } from '../composables/useReveal'
 import { API_BASE } from '../api'
+import { request } from '../utils/request'
 
 const { addReveal } = useReveal()
 const visible = ref(false)
@@ -9,7 +10,7 @@ const cases = ref<{name:string;type:string;area:string;style:string;desc:string}
 
 async function loadCases() {
   try {
-    const res = await fetch(`${API_BASE}/api/cases/`)
+    const res = await request(`${API_BASE}/api/cases/`)
     const data = await res.json()
     if (data.success) cases.value = data.data
   } catch {}
@@ -18,7 +19,7 @@ async function loadCases() {
 onMounted(() => {
   setTimeout(() => visible.value = true, 100)
   loadCases()
-  fetch(`${API_BASE}/api/faqs/`).then(r => r.json()).then(d => { if (d.success) faq.value = d.data }).catch(() => {})
+  request(`${API_BASE}/api/faqs/`).then(r => r.json()).then(d => { if (d.success) faq.value = d.data }).catch(() => {})
 })
 
 const flowSteps = [

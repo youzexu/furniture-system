@@ -5,6 +5,7 @@ import { useCartStore } from '../stores/cart'
 import { useToastStore } from '../stores/toast'
 import { useRecentStore } from '../stores/recent'
 import { API_BASE } from '../api'
+import { request } from '../utils/request'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,7 +19,7 @@ const loading = ref(true)
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${API_BASE}/api/products/`)
+    const res = await request(`${API_BASE}/api/products/`)
     const data = await res.json()
     if (data.success) {
       product.value = data.data.find((p: Product) => p.code === route.params.code) || null

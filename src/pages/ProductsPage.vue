@@ -3,6 +3,7 @@ import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useReveal } from '../composables/useReveal'
 import { API_BASE } from '../api'
+import { request } from '../utils/request'
 import { useRecentStore } from '../stores/recent'
 
 const { addReveal } = useReveal()
@@ -32,10 +33,10 @@ const categories = ref<{ key: string; label: string }[]>([{ key: 'all', label: '
 
 async function fetchCategories() {
   try {
-    const res = await fetch(`${API_BASE}/api/categories/`)
+    const res = await request(`${API_BASE}/api/categories/`)
     const data = await res.json()
     if (data.success) {
-      categories.value = [{ key: 'all', label: '全部产品' }, ...data.data.map((c: any) => ({ key: c.key, label: c.name + '系列' }))]
+      categories.value = [{ key: 'all', label: '全部产品' }, ...data.data.map((c: { key: string; name: string }) => ({ key: c.key, label: c.name + '系列' }))]
     }
   } catch {}
 }
@@ -54,7 +55,7 @@ async function loadProducts(search?: string) {
     if (search) params.set('search', search)
     const qs = params.toString()
     if (qs) url += '?' + qs
-    const res = await fetch(url)
+    const res = await request(url)
     const data = await res.json()
     if (data.success) products.value = data.data
   } catch {}

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { API_BASE } from '../api'
+import { request } from '../utils/request'
 
 const site = ref({ phone: '400-888-6688', email: 'info@shangpin.com', address: '佛山顺德龙江工业大道 188 号', company_name: '尚品工坊' })
 
 onMounted(async () => {
   try {
-    const res = await fetch('http://127.0.0.1:8000/api/site-config/')
+    const res = await request(`${API_BASE}/api/site-config/`)
     const data = await res.json()
     if (data.success) site.value = data.data
   } catch {}

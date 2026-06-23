@@ -45,7 +45,7 @@ async function handleLogin() {
     loading.value = false
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
-  } catch (e: any) {
+  } catch (e: unknown) {
     loading.value = false
     error.value = e.message || '用户名或密码错误'
   }

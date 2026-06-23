@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { API_BASE } from '../api'
+import { request } from '../utils/request'
 import { useCartStore } from './cart'
 
 interface User {
@@ -48,7 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function register(username: string, password: string, first_name: string, email: string) {
-    const res = await fetch(`${API_BASE}/api/auth/register/`, {
+    const res = await request(`${API_BASE}/api/auth/register/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password, first_name, email }),
@@ -63,7 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login(username: string, password: string) {
-    const res = await fetch(`${API_BASE}/api/auth/login/`, {
+    const res = await request(`${API_BASE}/api/auth/login/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
@@ -84,7 +85,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function updateProfile(first_name: string, email: string) {
     await refreshAccessToken()
-    const res = await fetch(`${API_BASE}/api/auth/update/`, {
+    const res = await request(`${API_BASE}/api/auth/update/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -102,7 +103,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function refreshAccessToken(): Promise<boolean> {
     if (!refreshToken.value) return false
     try {
-      const res = await fetch(`${API_BASE}/api/auth/refresh/`, {
+      const res = await request(`${API_BASE}/api/auth/refresh/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refresh: refreshToken.value }),
@@ -119,7 +120,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
-    const doFetch = () => fetch(url, {
+    const doFetch = () => request(url, {
       ...options,
       headers: {
         ...options.headers,

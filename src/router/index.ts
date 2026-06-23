@@ -79,6 +79,7 @@ const router = createRouter({
 // 路由守卫
 import { useAuthStore } from "../stores/auth";
 import { API_BASE } from "../api";
+import { request } from "../utils/request";
 router.beforeEach((to, _from, next) => {
   try {
     const auth = useAuthStore();
@@ -114,7 +115,7 @@ router.afterEach((to) => {
 })
 
 // Load SEO config
-fetch(`${API_BASE}/api/seo-config/`).then(r => r.json()).then(d => {
+request(`${API_BASE}/api/seo-config/`).then(r => r.json()).then(d => {
   if (d.success) (window as any).__seoConfig = d.data
 }).catch(() => {})
 

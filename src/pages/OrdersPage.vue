@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { API_BASE } from '../api'
+
+interface Order { id: number; code: string; created_at: string; total: string; status: string }
 
 const auth = useAuthStore()
-import { API_BASE } from '../api'
-const orders = ref<any[]>([])
+const orders = ref<Order[]>([])
 const loading = ref(true)
 const showConfirm = ref(false)
 const deletingId = ref<number | null>(null)

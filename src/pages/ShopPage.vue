@@ -7,6 +7,7 @@ import { useCheckout } from '../composables/useCheckout'
 import { useToastStore } from '../stores/toast'
 import { useRecentStore } from '../stores/recent'
 import { API_BASE } from '../api'
+import { request } from '../utils/request'
 
 const { addReveal } = useReveal()
 const toast = useToastStore()
@@ -62,10 +63,10 @@ const cats = ref<{ key: string; label: string }[]>([{ key: 'all', label: '全部
 
 async function fetchCategories() {
   try {
-    const res = await fetch(`${API_BASE}/api/shop-categories/`)
+    const res = await request(`${API_BASE}/api/shop-categories/`)
     const data = await res.json()
     if (data.success) {
-      cats.value = [{ key: 'all', label: '全部' }, ...data.data.map((c: any) => ({ key: c.key, label: c.name }))]
+      cats.value = [{ key: 'all', label: '全部' }, ...data.data.map((c: { key: string; name: string }) => ({ key: c.key, label: c.name }))]
     }
   } catch {}
 }
@@ -93,7 +94,7 @@ async function loadProducts() {
   loading.value = true
   loadError.value = false
   try {
-    const res = await fetch(`${API_BASE}/api/products/`)
+    const res = await request(`${API_BASE}/api/products/`)
     if (!res.ok) throw new Error('HTTP ' + res.status)
     const data = await res.json()
     if (data.success && data.data?.length > 0) {

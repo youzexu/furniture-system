@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import { useToastStore } from './stores/toast'
 import { API_BASE } from './api'
+import { request } from './utils/request'
 import NavBar from './components/NavBar.vue'
 import AppFooter from './components/AppFooter.vue'
 
@@ -26,7 +27,7 @@ function onScroll() {
 
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true })
-  fetch(`${API_BASE}/api/announcements/`).then(r => r.json()).then(d => {
+  request(`${API_BASE}/api/announcements/`).then(r => r.json()).then(d => {
     if (d.success && d.data.length > 0) { announcements.value = d.data; showAnnounce.value = true }
   }).catch(() => {})
 })

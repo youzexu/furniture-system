@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { API_BASE } from '../api'
+import { request } from '../utils/request'
 import { useReveal } from '../composables/useReveal'
 
 const { addReveal } = useReveal()
@@ -14,16 +15,16 @@ const homeCategories = ref<{key:string;name:string;desc?:string;image?:string}[]
 
 onMounted(() => {
   setTimeout(() => visible.value = true, 100)
-  fetch(`${API_BASE}/api/partners/`).then(r => r.json()).then(d => { if (d.success) partners.value = d.data }).catch(() => {})
-  fetch(`${API_BASE}/api/banners/`).then(r => r.json()).then(d => {
+  request(`${API_BASE}/api/partners/`).then(r => r.json()).then(d => { if (d.success) partners.value = d.data }).catch(() => {})
+  request(`${API_BASE}/api/banners/`).then(r => r.json()).then(d => {
     if (d.success && d.data.length > 0) {
       if (d.data.length > 1) setInterval(() => { bannerIndex.value = (bannerIndex.value + 1) % d.data.length }, 4000)
       banners.value = d.data
     }
   }).catch(() => {})
-  fetch(`${API_BASE}/api/testimonials/`).then(r => r.json()).then(d => { if (d.success) testimonials.value = d.data }).catch(() => {})
+  request(`${API_BASE}/api/testimonials/`).then(r => r.json()).then(d => { if (d.success) testimonials.value = d.data }).catch(() => {})
 })
-  fetch(`${API_BASE}/api/categories/`).then(r => r.json()).then(d => {
+  request(`${API_BASE}/api/categories/`).then(r => r.json()).then(d => {
     if (d.success) homeCategories.value = d.data
   }).catch(() => {})
 

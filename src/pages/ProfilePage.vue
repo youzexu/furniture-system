@@ -33,7 +33,7 @@ async function saveProfile() {
     await auth.updateProfile(form.first_name, form.email)
     success.value = '修改成功'
     editing.value = false
-  } catch (e: any) {
+  } catch (e: unknown) {
     error.value = e.message || '保存失败'
   }
   saving.value = false

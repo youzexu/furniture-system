@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { API_BASE } from '../api'
+import { request } from '../utils/request'
 import { useReveal } from '../composables/useReveal'
 
 const { addReveal } = useReveal()
@@ -11,9 +12,9 @@ const certs = ref<string[]>([])
 
 onMounted(() => {
   setTimeout(() => visible.value = true, 100)
-  fetch(`${API_BASE}/api/crafts/`).then(r=>r.json()).then(d=>{if(d.success) processes.value=d.data}).catch(()=>{})
-  fetch(`${API_BASE}/api/workshops/`).then(r=>r.json()).then(d=>{if(d.success) workshops.value=d.data}).catch(()=>{})
-  fetch(`${API_BASE}/api/certs/`).then(r=>r.json()).then(d=>{if(d.success) certs.value=d.data}).catch(()=>{})
+  request(`${API_BASE}/api/crafts/`).then(r=>r.json()).then(d=>{if(d.success) processes.value=d.data}).catch(()=>{})
+  request(`${API_BASE}/api/workshops/`).then(r=>r.json()).then(d=>{if(d.success) workshops.value=d.data}).catch(()=>{})
+  request(`${API_BASE}/api/certs/`).then(r=>r.json()).then(d=>{if(d.success) certs.value=d.data}).catch(()=>{})
 })
 </script>
 
