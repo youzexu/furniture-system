@@ -4,10 +4,13 @@ import { useReveal } from '../composables/useReveal'
 import { useCartStore } from '../stores/cart'
 import { useAuthStore } from '../stores/auth'
 import { useCheckout } from '../composables/useCheckout'
+import { useToastStore } from '../stores/toast'
+import { useRecentStore } from '../stores/recent'
 import { API_BASE } from '../api'
-import { request } from '../utils/request'
 
 const { addReveal } = useReveal()
+const toast = useToastStore()
+const recentStore = useRecentStore()
 
 function productImageSrc(p: { image?: string; code: string }): string {
   return p.image ? API_BASE + p.image : '/images/shop/' + p.code + '.svg'
@@ -26,19 +29,11 @@ const auth = useAuthStore()
 const showCheckout = ref(false)
 const showLoginPrompt = ref(false)
 const showClearConfirm = ref(false)
-const toastMsg = ref('')
-const toastTimer = ref<ReturnType<typeof setTimeout> | null>(null)
-
-function showToast(msg: string) {
-  toastMsg.value = msg
-  if (toastTimer.value) clearTimeout(toastTimer.value)
-  toastTimer.value = setTimeout(() => toastMsg.value = '', 2000)
-}
 
 function addToCart(p: Product) {
   if (!requireLogin()) return
   cart.addItem({ code: p.code, name: p.name, price: p.price, priceNum: p.priceNum, image: p.image })
-  showToast('已加入购物车')
+  toast.show('已加入购物车')
 }
 
 function requireLogin(): boolean {
@@ -67,7 +62,7 @@ const cats = ref<{ key: string; label: string }[]>([{ key: 'all', label: '全部
 
 async function fetchCategories() {
   try {
-    const res = await request(`${API_BASE}/api/shop-categories/`)
+    const res = await fetch(`${API_BASE}/api/shop-categories/`)
     const data = await res.json()
     if (data.success) {
       cats.value = [{ key: 'all', label: '全部' }, ...data.data.map((c: any) => ({ key: c.key, label: c.name }))]
@@ -89,11 +84,16 @@ const filtered = computed(() => {
 })
 const selectedProduct = ref<Product | null>(null)
 
+// 购买页浏览也写入历史记录
+watch(selectedProduct, (p) => {
+  if (p) recentStore.addItem({ code: p.code, name: p.name })
+})
+
 async function loadProducts() {
   loading.value = true
   loadError.value = false
   try {
-    const res = await request(`${API_BASE}/api/products/`)
+    const res = await fetch(`${API_BASE}/api/products/`)
     if (!res.ok) throw new Error('HTTP ' + res.status)
     const data = await res.json()
     if (data.success && data.data?.length > 0) {
@@ -133,8 +133,6 @@ const { step, submitting, submitted, orderForm, fieldErrors, nextStep } = useChe
     </section>
 
     <div class="shop-layout">
-      <!-- Toast -->
-      <div v-if="toastMsg" class="toast">{{ toastMsg }}</div>
       <!-- 左侧：产品列表 -->
       <section class="shop-main reveal" :ref="addReveal">
         <div class="filter-bar">

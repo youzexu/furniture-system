@@ -3,37 +3,31 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
-import CartPop from './CartPop.vue'
+import { useRecentStore } from '../stores/recent'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const cart = useCartStore()
+const recentStore = useRecentStore()
 const showCartPop = ref(false)
+const showCartClearConfirm = ref(false)
 const mobileMenuOpen = ref(false)
 const scrolled = ref(false)
 
 function onScroll() { scrolled.value = window.scrollY > 50 }
 const showRecentPop = ref(false)
-const recentItems = ref<{code:string;name:string}[]>([])
 
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true })
-  loadRecentViews()
+  recentStore.restore()
 })
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
-function loadRecentViews() {
-  const saved = localStorage.getItem('recentViews')
-  if (saved) recentItems.value = JSON.parse(saved)
-}
-
-// SPA 路由切换时重新读取浏览记录
-watch(() => route.path, () => loadRecentViews())
-
-function removeRecentItem(code: string) {
-  recentItems.value = recentItems.value.filter(r => r.code !== code)
-  localStorage.setItem('recentViews', JSON.stringify(recentItems.value))
+function confirmCartClear() {
+  cart.clear()
+  showCartClearConfirm.value = false
+  showCartPop.value = false
 }
 
 const navItems = [
@@ -52,7 +46,7 @@ function isActive(path: string): boolean {
 }
 const showLogoutConfirm = ref(false)
 
-async function handleLogout() {
+function handleLogout() {
   showLogoutConfirm.value = true
 }
 
@@ -89,11 +83,11 @@ async function confirmLogout() {
           <div v-if="showRecentPop" class="cart-backdrop" @click="showRecentPop = false"></div>
           <button class="recent-trigger" @click="showRecentPop = !showRecentPop" title="最近浏览">🕐</button>
           <div v-if="showRecentPop" class="cart-pop" @click.stop>
-            <div v-if="recentItems.length === 0" class="cart-pop-empty">暂无浏览记录</div>
+            <div v-if="recentStore.items.length === 0" class="cart-pop-empty">暂无浏览记录</div>
             <div v-else class="cart-pop-items">
-              <div class="cart-pop-item" v-for="(r, i) in recentItems" :key="i">
+              <div class="cart-pop-item" v-for="(r, i) in recentStore.items" :key="i">
                 <router-link :to="'/products/'+r.code" class="cip-name" @click="showRecentPop = false">{{ r.name }}</router-link>
-                <button class="cip-del" @click="removeRecentItem(r.code)">×</button>
+                <button class="cip-del" @click="recentStore.removeItem(r.code)">×</button>
               </div>
             </div>
           </div>
@@ -116,7 +110,10 @@ async function confirmLogout() {
               </div>
             </div>
             <div v-if="cart.totalItems > 0" class="cart-pop-total">合计 ¥{{ cart.totalPrice.toLocaleString() }}</div>
-            <CartPop @checkout="showCartPop = false; cart.triggerCheckout(); $router.push('/shop')" />
+            <div v-if="cart.totalItems > 0" class="cart-pop-actions">
+              <button class="pop-clear" @click="showCartClearConfirm = true">清空</button>
+              <router-link to="/shop" class="pop-checkout" @click="cart.triggerCheckout(); showCartPop = false">去结算</router-link>
+            </div>
           </div>
         </div>
 
@@ -141,6 +138,21 @@ async function confirmLogout() {
       </div>
     </div>
   </header>
+
+  <!-- 清空购物车确认 -->
+  <Teleport to="body">
+    <div v-if="showCartClearConfirm" class="prompt-overlay" @click.self="showCartClearConfirm = false">
+      <div class="prompt-card">
+        <span class="prompt-icon">🗑️</span>
+        <h3>清空购物车</h3>
+        <p>确定要移除购物车中所有商品吗？</p>
+        <div class="prompt-actions">
+          <button class="btn-danger" @click="confirmCartClear">确认清空</button>
+          <button class="btn-outline-dark" @click="showCartClearConfirm = false">取消</button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -485,6 +497,39 @@ async function confirmLogout() {
 
 }
 
+.cart-pop-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #eee;
+}
+
+.pop-clear {
+  padding: 8px 16px;
+  background: none;
+  border: 1px solid #eee;
+  color: #999;
+  font-size: 12px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .3s;
+}
+.pop-clear:hover { color: #c00; border-color: #c00; }
+
+.pop-checkout {
+  flex: 1;
+  padding: 8px;
+  background: var(--gold);
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-decoration: none;
+  transition: background .3s;
+}
+.pop-checkout:hover { background: #7a5c12; }
+
 .hamburger {
   display: none;
   flex-direction: column;
@@ -528,4 +573,29 @@ async function confirmLogout() {
     margin-left: auto;
   }
 }
+
+.prompt-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  z-index: 1000; display: flex; align-items: center; justify-content: center;
+}
+.prompt-card {
+  background: #fff; border-radius: 8px; padding: 32px 40px;
+  text-align: center; max-width: 420px; width: 90%;
+}
+.prompt-card .prompt-icon { font-size: 36px; display: block; margin-bottom: 12px; }
+.prompt-card h3 { font-size: 18px; color: var(--dark); margin-bottom: 8px; letter-spacing: 2px; }
+.prompt-card p { font-size: 13px; color: #999; margin-bottom: 24px; line-height: 1.6; }
+.prompt-actions { display: flex; gap: 12px; justify-content: center; }
+.btn-danger {
+  padding: 10px 28px; background: #c0392b; color: #fff;
+  border: none; font-size: 13px; letter-spacing: 2px; cursor: pointer;
+  font-family: inherit; border-radius: 4px; transition: background .3s;
+}
+.btn-danger:hover { background: #a93226; }
+.btn-outline-dark {
+  padding: 10px 28px; border: 1px solid #ddd; color: #666;
+  background: none; font-size: 13px; letter-spacing: 2px; cursor: pointer;
+  font-family: inherit; border-radius: 4px; transition: all .3s;
+}
+.btn-outline-dark:hover { border-color: #aaa; color: #333; }
 </style>

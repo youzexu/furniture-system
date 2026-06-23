@@ -2,19 +2,20 @@
 import { ref, onMounted, onUnmounted, onErrorCaptured } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
+import { useToastStore } from './stores/toast'
 import { API_BASE } from './api'
 import NavBar from './components/NavBar.vue'
 import AppFooter from './components/AppFooter.vue'
-import AppToast from './components/AppToast.vue'
 
 const auth = useAuthStore()
+const toast = useToastStore()
 const router = useRouter()
 const showBackTop = ref(false)
 const announcements = ref<{ text: string; link: string }[]>([])
 const showAnnounce = ref(false)
 const routeError = ref(false)
 
-onErrorCaptured((err) => {
+onErrorCaptured((_err) => {
   routeError.value = true
   return false
 })
@@ -53,7 +54,10 @@ function scrollToTop() {
       </span>
     </div>
 
-    <AppToast ref="appToast" />
+    <!-- Toast notification -->
+    <Teleport to="body">
+      <div v-if="toast.visible" class="app-toast">{{ toast.message }}</div>
+    </Teleport>
 
     <main class="page-content">
       <div v-if="routeError" class="route-error">
@@ -188,6 +192,24 @@ function scrollToTop() {
 
 .back-top:hover {
   background: var(--gold);
+}
+
+.app-toast {
+  position: fixed;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dark);
+  color: #fff;
+  padding: 12px 28px;
+  font-size: 13px;
+  letter-spacing: 3px;
+  z-index: 300;
+  animation: toastIn .3s ease;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 .route-error, .route-loading {

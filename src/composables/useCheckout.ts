@@ -2,7 +2,6 @@ import { ref, reactive } from 'vue'
 import { useCartStore } from '../stores/cart'
 import { useAuthStore } from '../stores/auth'
 import { API_BASE } from '../api'
-import { request } from '../utils/request'
 
 export function useCheckout() {
   const cart = useCartStore()

@@ -2,27 +2,18 @@
 import { onMounted, ref } from 'vue'
 import { API_BASE } from '../api'
 import { useReveal } from '../composables/useReveal'
-import { useSiteStore } from '../stores/site'
 
 const { addReveal } = useReveal()
-const siteStore = useSiteStore()
 const visible = ref(false)
 const heroTitle = ref('以工艺之名\n定义家居美学')
 const heroSub = ref('二十三年专注高端家具制造\n从原木到成品，每一件都是对品质的承诺')
 const banners = ref<{title:string;image:string;link:string}[]>([])
 const bannerIndex = ref(0)
 
-const homeCategories = ref<{key:string;name:string;desc:string;image:string}[]>([])
+const homeCategories = ref<{key:string;name:string;desc?:string;image?:string}[]>([])
 
 onMounted(() => {
   setTimeout(() => visible.value = true, 100)
-  siteStore.fetchCategories().then(() => { homeCategories.value = siteStore.categories })
-  siteStore.fetchSiteConfig().then(() => {
-    if (siteStore.siteConfig) {
-      heroTitle.value = siteStore.siteConfig.hero_title
-      heroSub.value = siteStore.siteConfig.hero_sub
-    }
-  })
   fetch(`${API_BASE}/api/partners/`).then(r => r.json()).then(d => { if (d.success) partners.value = d.data }).catch(() => {})
   fetch(`${API_BASE}/api/banners/`).then(r => r.json()).then(d => {
     if (d.success && d.data.length > 0) {
@@ -32,6 +23,9 @@ onMounted(() => {
   }).catch(() => {})
   fetch(`${API_BASE}/api/testimonials/`).then(r => r.json()).then(d => { if (d.success) testimonials.value = d.data }).catch(() => {})
 })
+  fetch(`${API_BASE}/api/categories/`).then(r => r.json()).then(d => {
+    if (d.success) homeCategories.value = d.data
+  }).catch(() => {})
 
 const advantages = [
   { icon: '', title: '原木直采', desc: '与全球优质林场建立长期合作，从源头把控木材品质，FSC 认证保障可持续性，精选北美白橡、欧洲榉木、东南亚柚木等优质原材。' },
@@ -211,7 +205,7 @@ const testimonials = ref<{name:string;role:string;text:string}[]>([])
 .hero-tag { font-size: 12px; letter-spacing: 6px; color: var(--gold-light); margin-bottom: 20px; }
 .hero-title { font-size: 64px; font-weight: 300; line-height: 1.2; letter-spacing: 8px; margin-bottom: 24px; font-family: 'Noto Serif SC', serif; white-space: pre-line; }
 .hero-sub { font-size: 16px; line-height: 1.8; color: rgba(255,255,255,0.65); letter-spacing: 2px; white-space: pre-line; }
-.hero-actions { margin-top: 40px; display: flex; gap: 20px; justify-content: flex-start; }
+.hero-actions { margin-top: 40px; display: flex; gap: 20px; justify-content: center; }
 .hero-stats {
   position: absolute;
   bottom: 60px;
@@ -315,6 +309,7 @@ const testimonials = ref<{name:string;role:string;text:string}[]>([])
 /* Hero Split */
 .hero-split { display: flex; height: 80vh; min-height: 520px; margin-top: 72px; }
 .hero-left { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 80px 60px; background: #fff; }
+.hero-left .hero-actions { justify-content: flex-start; }
 .hero-left .hero-tag { color: var(--gold); }
 .hero-left .hero-title { color: var(--dark); }
 .hero-left .hero-sub { color: var(--text-light); }

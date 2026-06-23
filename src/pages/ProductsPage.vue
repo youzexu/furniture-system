@@ -3,9 +3,10 @@ import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useReveal } from '../composables/useReveal'
 import { API_BASE } from '../api'
-import { request } from '../utils/request'
+import { useRecentStore } from '../stores/recent'
 
 const { addReveal } = useReveal()
+const recentStore = useRecentStore()
 const visible = ref(false)
 const route = useRoute()
 onMounted(() => {
@@ -13,21 +14,13 @@ onMounted(() => {
   loadProducts()
   fetchCategories()
   if (route.query.cat) activeCat.value = route.query.cat as string
+  recentStore.restore()
 })
 
 const activeCat = ref('all')
 const searchQuery = ref('')
-const recentViews = ref<{code:string;name:string}[]>([])
 
-onMounted(() => {
-  const saved = localStorage.getItem('recentViews')
-  if (saved) recentViews.value = JSON.parse(saved)
-})
-
-function removeRecent(code: string) {
-  recentViews.value = recentViews.value.filter(p => p.code !== code)
-  localStorage.setItem('recentViews', JSON.stringify(recentViews.value))
-}
+function removeRecent(code: string) { recentStore.removeItem(code) }
 
 let debounceTimer: ReturnType<typeof setTimeout>
 async function onSearch() {
@@ -39,7 +32,7 @@ const categories = ref<{ key: string; label: string }[]>([{ key: 'all', label: '
 
 async function fetchCategories() {
   try {
-    const res = await request(`${API_BASE}/api/categories/`)
+    const res = await fetch(`${API_BASE}/api/categories/`)
     const data = await res.json()
     if (data.success) {
       categories.value = [{ key: 'all', label: '全部产品' }, ...data.data.map((c: any) => ({ key: c.key, label: c.name + '系列' }))]
@@ -61,7 +54,7 @@ async function loadProducts(search?: string) {
     if (search) params.set('search', search)
     const qs = params.toString()
     if (qs) url += '?' + qs
-    const res = await request(url)
+    const res = await fetch(url)
     const data = await res.json()
     if (data.success) products.value = data.data
   } catch {}
@@ -124,12 +117,12 @@ const filtered = computed(() => activeCat.value === 'all' ? products.value : pro
     </section>
 
     <!-- 最近浏览 -->
-    <section v-if="recentViews.length > 0" class="section" style="padding-top:0">
+    <section v-if="recentStore.items.length > 0" class="section" style="padding-top:0">
       <div class="container">
         <p class="section-label">RECENTLY VIEWED</p>
         <h2 class="section-title">最近浏览</h2>
         <div class="recent-row">
-          <div class="recent-item" v-for="p in recentViews" :key="p.code" @click="$router.push('/products/'+p.code)">
+          <div class="recent-item" v-for="p in recentStore.items" :key="p.code" @click="$router.push('/products/'+p.code)">
             <span class="recent-name">{{ p.name }}</span>
             <button class="recent-del" @click.stop="removeRecent(p.code)">×</button>
           </div>

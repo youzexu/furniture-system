@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { API_BASE } from '../api'
-import { request } from '../utils/request'
 import { useCartStore } from './cart'
 
 interface User {
@@ -15,7 +14,7 @@ interface User {
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const accessToken = ref<string>('')
-  const refreshTokenStr = ref<string>('')
+  const refreshToken = ref<string>('')
   const showExpired = ref(false)
 
   const isLoggedIn = computed(() => !!accessToken.value && !!user.value)
@@ -27,7 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
       try {
         const data = JSON.parse(saved)
         accessToken.value = data.access || ''
-        refreshTokenStr.value = data.refresh || ''
+        refreshToken.value = data.refresh || ''
         user.value = data.user || null
       } catch {}
     }
@@ -36,20 +35,20 @@ export const useAuthStore = defineStore('auth', () => {
   function save() {
     localStorage.setItem('auth', JSON.stringify({
       access: accessToken.value,
-      refresh: refreshTokenStr.value,
+      refresh: refreshToken.value,
       user: user.value,
     }))
   }
 
   function clear() {
     accessToken.value = ''
-    refreshTokenStr.value = ''
+    refreshToken.value = ''
     user.value = null
     localStorage.removeItem('auth')
   }
 
   async function register(username: string, password: string, first_name: string, email: string) {
-    const res = await request(`${API_BASE}/api/auth/register/`, {
+    const res = await fetch(`${API_BASE}/api/auth/register/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password, first_name, email }),
@@ -57,14 +56,14 @@ export const useAuthStore = defineStore('auth', () => {
     const data = await res.json()
     if (!data.success) throw new Error(data.message)
     accessToken.value = data.access
-    refreshTokenStr.value = data.refresh
+    refreshToken.value = data.refresh
     user.value = data.user
     save()
     return data
   }
 
   async function login(username: string, password: string) {
-    const res = await request(`${API_BASE}/api/auth/login/`, {
+    const res = await fetch(`${API_BASE}/api/auth/login/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
@@ -72,7 +71,7 @@ export const useAuthStore = defineStore('auth', () => {
     const data = await res.json()
     if (!data.success) throw new Error(data.message)
     accessToken.value = data.access
-    refreshTokenStr.value = data.refresh
+    refreshToken.value = data.refresh
     user.value = data.user
     save()
     return data
@@ -85,7 +84,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function updateProfile(first_name: string, email: string) {
     await refreshAccessToken()
-    const res = await request(`${API_BASE}/api/auth/update/`, {
+    const res = await fetch(`${API_BASE}/api/auth/update/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -101,12 +100,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function refreshAccessToken(): Promise<boolean> {
-    if (!refreshTokenStr.value) return false
+    if (!refreshToken.value) return false
     try {
-      const res = await request(`${API_BASE}/api/auth/refresh/`, {
+      const res = await fetch(`${API_BASE}/api/auth/refresh/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh: refreshTokenStr.value }),
+        body: JSON.stringify({ refresh: refreshToken.value }),
       })
       const data = await res.json()
       if (data.success) {
@@ -120,7 +119,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
-    const doFetch = () => request(url, {
+    const doFetch = () => fetch(url, {
       ...options,
       headers: {
         ...options.headers,
@@ -148,5 +147,5 @@ export const useAuthStore = defineStore('auth', () => {
   // 初始化时恢复
   restore()
 
-  return { user, accessToken, refreshTokenStr, showExpired, isLoggedIn, login, register, logout, updateProfile, authFetch, refreshAccessToken, closeExpired, restore }
+  return { user, accessToken, refreshToken, showExpired, isLoggedIn, login, register, logout, updateProfile, authFetch, refreshAccessToken, closeExpired, restore }
 })

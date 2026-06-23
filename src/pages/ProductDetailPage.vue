@@ -2,21 +2,23 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
+import { useToastStore } from '../stores/toast'
+import { useRecentStore } from '../stores/recent'
 import { API_BASE } from '../api'
-import { request } from '../utils/request'
 
 const route = useRoute()
 const router = useRouter()
 const cart = useCartStore()
+const toast = useToastStore()
+const recentStore = useRecentStore()
 
 interface Product { code:string; name:string; cat:string; material:string; size:string; price:string; priceNum:number; desc:string; details:string[]; image:string; tag:string }
 const product = ref<Product | null>(null)
 const loading = ref(true)
-const toastMsg = ref('')
 
 onMounted(async () => {
   try {
-    const res = await request(`${API_BASE}/api/products/`)
+    const res = await fetch(`${API_BASE}/api/products/`)
     const data = await res.json()
     if (data.success) {
       product.value = data.data.find((p: Product) => p.code === route.params.code) || null
@@ -25,12 +27,7 @@ onMounted(async () => {
   loading.value = false
   // Save to recent views
   if (product.value) {
-    const saved = localStorage.getItem('recentViews')
-    let views: Product[] = saved ? JSON.parse(saved) : []
-    views = views.filter(p => p.code !== product.value!.code)
-    views.unshift(product.value)
-    views = views.slice(0, 5)
-    localStorage.setItem('recentViews', JSON.stringify(views))
+    recentStore.addItem({ code: product.value.code, name: product.value.name })
   }
 })
 
@@ -39,23 +36,19 @@ function goBack() { router.back() }
 function addToCart() {
   if (!product.value) return
   cart.addItem({ code: product.value.code, name: product.value.name, price: product.value.price, priceNum: product.value.priceNum, image: product.value.image })
-  toastMsg.value = '已加入购物车'
-  setTimeout(() => toastMsg.value = '', 2000)
+  toast.show('已加入购物车')
   setTimeout(goBack, 600)
 }
 
 function shareProduct() {
   navigator.clipboard.writeText(window.location.href).then(() => {
-    toastMsg.value = '链接已复制'
-    setTimeout(() => toastMsg.value = '', 2000)
+    toast.show('链接已复制')
   }).catch(() => {})
 }
 </script>
 
 <template>
-  <div class="detail-page">
-    <div v-if="toastMsg" class="toast">{{ toastMsg }}</div>
-    <div v-if="loading" class="state-box"><span>⏳</span><p>加载中...</p></div>
+  <div class="detail-page">    <div v-if="loading" class="state-box"><span>⏳</span><p>加载中...</p></div>
     <div v-else-if="!product" class="state-box"><span>⚠️</span><p>产品不存在</p><button class="btn-back" @click="goBack">返回</button></div>
     <div v-else class="detail-content">
       <nav class="breadcrumb"><router-link to="/">首页</router-link> / <router-link to="/products">产品</router-link> / <span>{{ product.name }}</span></nav>
@@ -123,6 +116,4 @@ function shareProduct() {
 .btn-outline { padding:14px 36px; border:1px solid var(--gold); color:var(--gold); font-size:14px; letter-spacing:3px; transition:all .3s; }
 .btn-outline:hover { background:var(--gold); color:#fff; }
 @media (max-width:768px) { .detail-grid { flex-direction:column; } }
-.toast { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 12px 28px; font-size: 13px; letter-spacing: 3px; z-index: 300; animation: toastIn .3s ease; }
-@keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(-10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
 </style>
